@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="title_login">Login</string>
+    <string name="title_signup">Signup</string>
+    <string name="title_home">Home</string>
+    <string name="title_point">Point</string>
+    <string name="title_my_page">My Page</string>
+</resources>
