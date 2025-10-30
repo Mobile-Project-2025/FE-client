@@ -35,10 +35,12 @@
     <fragment
         android:id="@+id/navigation_point"
         android:name="com.example.myapplication.ui.Point.PointFragment"
-        android:label="@string/title_point" />
+        android:label="@string/title_point"
+        tools:layout="@layout/fragment_point"/>
 
     <fragment
         android:id="@+id/navigation_my_page"
         android:name="com.example.myapplication.ui.My_page.My_pageFragment"
-        android:label="@string/title_my_page" />
+        android:label="@string/title_my_page"
+        tools:layout="@layout/fragment_my_page"/>
 </navigation>
