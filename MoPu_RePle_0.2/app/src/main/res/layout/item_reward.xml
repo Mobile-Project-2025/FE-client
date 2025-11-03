@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="96dp"
+    android:layout_marginTop="12dp"
+    app:cardCornerRadius="12dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="12dp">
+
+        <!-- 썸네일 이미지 -->
+        <ImageView
+            android:id="@+id/imgThumb"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_placeholder"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- 브랜드명 -->
+        <TextView
+            android:id="@+id/tvBrand"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="스타벅스"
+            android:textColor="#7A7A7A"
+            android:textSize="12sp"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/imgThumb"
+            app:layout_constraintTop_toTopOf="@id/imgThumb"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 상품명 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="카페아메리카노 Tall"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintStart_toStartOf="@id/tvBrand"
+            app:layout_constraintTop_toBottomOf="@id/tvBrand"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 코인 아이콘 -->
+        <ImageView
+            android:id="@+id/imgCoin"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_coin"
+            app:layout_constraintStart_toStartOf="@id/tvTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <!-- 가격 -->
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="5,740"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/imgCoin"
+            app:layout_constraintTop_toTopOf="@id/imgCoin"
+            app:layout_constraintBottom_toBottomOf="@id/imgCoin" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
