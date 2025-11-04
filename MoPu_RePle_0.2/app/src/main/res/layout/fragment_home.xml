@@ -12,41 +12,63 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
         android:layout_marginTop="75dp"
+
+        android:text="Re:Ple"
         android:textSize="35sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        android:text="Re:Ple" />
 
-    <ImageView
-        android:id="@+id/home_img_horse"
-        android:layout_width="match_parent"
+    <!-- 이미지 좌우 슬라이드 영역 -->
+    <FrameLayout
+        android:id="@+id/home_img_slide_container"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:src="@drawable/horse_picture"
-
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/home_title" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/home_title">
 
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/home_img_slide_1"
+            android:layout_width="match_parent"
+            android:layout_height="220dp" />
+
+        <Button
+            android:id="@+id/home_img_button_see_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:layout_gravity="bottom|end"
+            android:backgroundTint="@color/eco_green_bright"
+
+            android:text="전체보기" />
+    </FrameLayout>
+
+    <!-- 검색창 -->
     <EditText
         android:id="@+id/home_search"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/text_input_box"
+        android:background="@drawable/border_box_lightgreen"
+        android:drawableStart="@drawable/outline_document_search_24"
+        android:drawablePadding="10dp"
+        android:hint="미션 검색"
+        android:paddingStart="10dp"
 
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/home_img_horse" />
+        app:layout_constraintTop_toBottomOf="@+id/home_img_slide_container"
+        app:layout_constraintWidth_percent="0.9" />
 
     <LinearLayout
         android:id="@+id/home_linear_0"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,6 +80,7 @@
             android:id="@+id/home_linear_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -66,8 +89,8 @@
                 android:id="@+id/home_button_type_mission_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:backgroundTint="@color/eco_green_bright"
                 android:text="승인 대기 미션" />
 
@@ -75,8 +98,8 @@
                 android:id="@+id/home_button_type_mission_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:backgroundTint="@color/eco_green_bright"
                 android:text="고정 미션" />
 
@@ -84,8 +107,8 @@
                 android:id="@+id/home_button_type_mission_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:backgroundTint="@color/eco_green_bright"
                 android:text="돌발 미션" />
         </LinearLayout>
@@ -94,73 +117,18 @@
             android:id="@+id/home_text_mission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
 
             android:text="승인 대기 미션 \n 오늘도 환경을 잘 부탁해" />
 
 
-        <!-- 미션 박스 개체 1개 -->
-        <LinearLayout
-            android:id="@+id/home_mission_box_1"
-            android:layout_width="360dp"
-            android:layout_height="90dp"
-            android:orientation="horizontal">
+        <!-- 미션박스의 80% 너비를 위함 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/home_mission_icon_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_mission" />
 
-            <!-- 이미지 오른쪽 linear == 텍스트 vertical 배치용 -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/home_mission_text_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="참여 중인 챌린지 목록"
-                    android:textSize="18sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/home_mission_icon_1"
-
-                    app:layout_constraintTop_toTopOf="parent" />
-
-<!--                -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/home_mission_text_point"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="300P"
-                        android:textSize="15sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/home_mission_icon_1"
-
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/home_mission_text_people"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="10명"
-                        android:textSize="15sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/home_mission_icon_1"
-
-                        app:layout_constraintTop_toTopOf="parent" />
-                </LinearLayout>
-
-            </LinearLayout>
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
 
