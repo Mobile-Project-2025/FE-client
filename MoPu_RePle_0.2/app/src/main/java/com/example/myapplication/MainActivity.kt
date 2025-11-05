@@ -22,16 +22,22 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        // 상단 라벨바 / 하단 네비게이션 바 관련
+        // 상단 액션바 , 하단 네비바 관련
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
 
-                // 안 보임 == login, signup 페이지
+                // 액션바 네비바 둘 다 안 보임 == login, signup 페이지
                 R.id.navigation_login, R.id.navigation_signup -> {
                     supportActionBar?.hide()
                     binding.navView.visibility = View.GONE
+                }
+
+                // 액션바만 숨기고, 네비바는 살아있음 == home 페이지, point 페이지
+                R.id.navigation_home, R.id.navigation_point, R.id.navigation_my_page -> {
+                    supportActionBar?.hide()
+                    binding.navView.visibility = View.VISIBLE
                 }
 
                 // 보임 == 다른화면들
