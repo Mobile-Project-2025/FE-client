@@ -17,6 +17,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
+import android.content.Context
 
 class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
@@ -70,9 +71,21 @@ class LoginFragment : Fragment() {
 
                 // 로그인 성공 == (임시) 토스트로 로그 띄우고, 홈화면으로 이동
                 POST_login_request(value_login_ID, value_login_PW)  // 로그인 api 요청
-                Toast.makeText(requireContext(), "ID == $value_login_ID, PW == $value_login_PW", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "ID == $value_login_ID, PW == $value_login_PW",
+                    Toast.LENGTH_SHORT
+                ).show()
+                //
+                //
+                //
+                //
+                // 아래 findNav 주석처리 하면, 로그인 실패해도 자동으로 안 넘어가고, 로그인 화면에 머무름
                 findNavController().navigate(R.id.move_login_to_home)
                 break
+
+
+
 
 //                // 로그인 실패 == 다이얼로그 메시지
 //                AlertDialog.Builder(requireContext()).run {
@@ -84,7 +97,6 @@ class LoginFragment : Fragment() {
 //                }
             }
         }
-
 
         // 회원가입 하기 버튼 == 회원가입 페이지로 이동
         binding.loginMovetoSignup.setOnClickListener {
@@ -98,10 +110,9 @@ class LoginFragment : Fragment() {
     }
 
 
-
     // 로그인 요청 function 함수
     private fun POST_login_request(ID: String, Password: String) {
-        val client = OkHttpClient()
+        val client = HttpClientProvider.get(requireContext())
 
         val json = JSONObject().apply {
             put("studentId", ID)
@@ -138,6 +149,9 @@ class LoginFragment : Fragment() {
                             val nickname = obj.optString("nickname")
                             val role = obj.optString("role")
 
+                            // 토큰 저장 (TokenStore - Interceptor가 자동으로 사용)
+                            TokenStore.save(requireContext(), token)
+
                             // 토큰 저장 (SharedPreferences)
                             val sp = requireContext().getSharedPreferences("auth", 0)
                             sp.edit()
@@ -146,7 +160,11 @@ class LoginFragment : Fragment() {
                                 .putString("role", role)
                                 .apply()
 
-                            Toast.makeText(requireContext(), "로그인 성공: ${nickname}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "로그인 성공: ${nickname}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             // 홈으로 이동
                             findNavController().navigate(R.id.move_login_to_home)
                         } catch (t: Throwable) {
@@ -169,10 +187,69 @@ class LoginFragment : Fragment() {
             }
         })
     }
-    // TIP: 이후 API 호출 시 Authorization 헤더 넣는 방법 (OkHttp 예)
-    // val token = requireContext().getSharedPreferences("auth", 0).getString("accessToken", null)
-    // val authedRequest = Request.Builder()
-    //     .url("http://43.202.225.195:8080/your/api")
-    //     .addHeader("Authorization", "Bearer ${token}")
-    //     .build()
 }
+
+object TokenStore {
+    private const val SP = "auth"
+    private const val KEY = "accessToken"
+
+    fun save(context: Context, token: String?) {
+        if (token.isNullOrBlank()) return
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY, token).apply()
+    }
+    fun get(context: Context): String? = context.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY, null)
+    fun clear(context: Context) {
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().remove(KEY).apply()
+    }
+}
+
+class AuthInterceptor(private val context: Context) : Interceptor {
+    private val excludedPaths = listOf(
+        "/api/auth/login",
+        "/api/auth/signup"
+    )
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val original = chain.request()
+        val urlPath = original.url.encodedPath
+
+        val shouldAttach = excludedPaths.none { urlPath.endsWith(it) }
+
+        val reqBuilder = original.newBuilder()
+            .header("Accept", "application/json")
+
+        if (shouldAttach) {
+            val token = TokenStore.get(context)
+            if (!token.isNullOrBlank()) {
+                reqBuilder.header("Authorization", "Bearer $token") // Bearer 추가
+            }
+        }
+
+        val response = chain.proceed(reqBuilder.build())
+
+        // 코드 == 401
+        if (response.code == 401) {
+            TokenStore.clear(context)
+        }
+        return response
+    }
+}
+
+object HttpClientProvider {
+    @Volatile
+    private var client: OkHttpClient? = null
+
+    fun get(context: Context): OkHttpClient {
+        return client ?: synchronized(this) {
+            client ?: OkHttpClient.Builder()
+                .addInterceptor(AuthInterceptor(context.applicationContext))
+                .build()
+                .also { client = it }
+        }
+    }
+}
+
+// val token = requireContext().getSharedPreferences("auth", 0).getString("accessToken", null)
+// val authedRequest = Request.Builder()
+//     .url("http://43.202.225.195:8080/your/api")
+//     .addHeader("Authorization", "Bearer ${token}")
+//     .build()
