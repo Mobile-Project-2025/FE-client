@@ -35,7 +35,11 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 // 액션바만 숨기고, 네비바는 살아있음 == home 페이지, point 페이지
+<<<<<<< HEAD
                 R.id.navigation_home, R.id.navigation_point -> {
+=======
+                R.id.navigation_home, R.id.navigation_point, R.id.navigation_my_page -> {
+>>>>>>> cc26468a699db79f60931a7850be257110a7b0c0
                     supportActionBar?.hide()
                     binding.navView.visibility = View.VISIBLE
                 }

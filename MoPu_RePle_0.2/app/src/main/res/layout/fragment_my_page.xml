@@ -1,22 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.My_page.My_pageFragment">
+    tools:context=".ui.My_page.My_pageFragment"
+    android:paddingTop="41dp">
 
+    <!-- 타이틀 -->
     <TextView
-        android:id="@+id/text_notifications"
-        android:layout_width="match_parent"
+        android:id="@+id/my_page_RePle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Re:Ple"
+        android:textColor="@color/eco_green_dark"
+        android:textStyle="bold"
+        android:textSize="30sp"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <View
+        android:id="@+id/underline_1"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#AFAFAF"
+        app:layout_constraintTop_toBottomOf="@id/my_page_RePle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- 헤더: 프로필 이미지 + 텍스트 묶음 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/underline_1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/user_image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:src="@drawable/default_profile"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/user_nickname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="닉네임"
+            android:textColor="#2A8250"
+            android:textSize="20sp"
+            app:layout_constraintTop_toTopOf="@id/user_image"
+            app:layout_constraintStart_toEndOf="@id/user_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="10dp"/>
+
+
+
+        <TextView
+            android:id="@+id/user_suffix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="님"
+            android:textSize="18sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/user_nickname"
+            app:layout_constraintStart_toEndOf="@id/user_nickname"
+            android:layout_marginStart="4dp"/>
+
+        <TextView
+            android:id="@+id/welcome_msg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="오늘 챌린지도 힘내세요!"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/user_nickname"
+            app:layout_constraintStart_toStartOf="@id/user_nickname"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="6dp"/>
+
+        <TextView
+            android:id="@+id/student_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="학번: 22XXXXXX"
+            android:textColor="#AFAFAF"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@id/user_nickname"
+            app:layout_constraintTop_toBottomOf="@id/welcome_msg" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 보유 포인트 영역 -->
+    <LinearLayout
+        android:id="@+id/gray_box"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#F0F0F0"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="보유 포인트"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:paddingStart="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/mp_white_box_bg"
+            android:padding="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:id="@+id/user_point"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10800p"
+                android:textSize="16sp"
+                android:textColor="#2A8250"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/underline_2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#AFAFAF"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/gray_box"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- 챌린지 이력 -->
+    <LinearLayout
+        android:id="@+id/mp_challenge"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/underline_2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/mp_challenge_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="챌린지 참여 이력 확인"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingStart="10dp"/>
+
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="22dp"
+            android:src="@drawable/mp_arrow"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/underline_3"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#AFAFAF"
+        app:layout_constraintTop_toBottomOf="@id/mp_challenge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- 로그아웃 -->
+    <TextView
+        android:id="@+id/mp_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="로그아웃"
+        android:textColor="#AFAFAF"
+        android:textSize="15sp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintTop_toBottomOf="@id/underline_3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

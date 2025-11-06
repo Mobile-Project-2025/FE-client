@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.My_page
 
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,6 +34,14 @@ class My_pageFragment : Fragment() {
 //            textView.text = it
 //        }
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) { // [추가] onViewCreated 메서드
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.mpLogout.apply {
+            paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        }
     }
 
     override fun onDestroyView() {
