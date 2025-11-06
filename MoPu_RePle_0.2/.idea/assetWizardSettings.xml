@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:$USER_HOME$/Library/Android/sdk/icons/material/materialsymbolsoutlined/document_search/outline_document_search_24.xml" />
+                                      <entry key="url" value="file:/$USER_HOME$/AppData/Local/Android/Sdk/icons/material/materialsymbolsoutlined/attach_money/outline_attach_money_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -33,7 +33,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="outline_document_search_24" />
+                            <entry key="outputName" value="ic_coin" />
+                            <entry key="sourceFile" value="C:\Users\singe\AndroidStudioProjects\FE-client\MoPu_RePle_0.2" />
                           </map>
                         </option>
                       </PersistentState>
