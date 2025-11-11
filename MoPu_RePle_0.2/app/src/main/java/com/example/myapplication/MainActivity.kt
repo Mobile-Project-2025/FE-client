@@ -28,18 +28,14 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
 
-                // 액션바 네비바 둘 다 안 보임 == login, signup 페이지
-                R.id.navigation_login, R.id.navigation_signup -> {
+                // 액션바, 네비바 둘 다 안 보임 == login, signup, admin_main, admin_mission_list
+                R.id.navigation_login, R.id.navigation_signup, R.id.navigation_admin_main, R.id.navigation_admin_mission_list -> {
                     supportActionBar?.hide()
                     binding.navView.visibility = View.GONE
                 }
 
-                // 액션바만 숨기고, 네비바는 살아있음 == home 페이지, point 페이지
-<<<<<<< HEAD
-                R.id.navigation_home, R.id.navigation_point -> {
-=======
+                // 액션바만 숨기고, 네비바는 살아있음 == home, point, my page
                 R.id.navigation_home, R.id.navigation_point, R.id.navigation_my_page -> {
->>>>>>> cc26468a699db79f60931a7850be257110a7b0c0
                     supportActionBar?.hide()
                     binding.navView.visibility = View.VISIBLE
                 }

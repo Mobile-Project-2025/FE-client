@@ -1,27 +1,21 @@
-package com.example.myapplication.ui.Home
+package com.example.myapplication.ui.Admin_MissionList
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import com.example.myapplication.databinding.FragmentHomeBinding
-import com.example.myapplication.R
-import android.widget.TextView
-import androidx.viewpager2.widget.ViewPager2
-import androidx.recyclerview.widget.RecyclerView
-import android.widget.ImageView
 import android.view.ViewGroup.LayoutParams
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.R
+import com.example.myapplication.databinding.FragmentAdminMissionListBinding
 
+class AdminMissionListFragment : Fragment() {
 
-class HomeFragment : Fragment() {
-
-    private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    private var _binding: FragmentAdminMissionListBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -29,22 +23,11 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentAdminMissionListBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-
-        // 이미지 좌우 슬라이드 영역
-        val pager = root.findViewById<ViewPager2>(R.id.home_img_slide_1)
-        val sliderImages = listOf(
-            R.drawable.horse_picture,
-            R.drawable.horse_picture,
-            R.drawable.horse_picture
-        )
-        pager.adapter = ImagePagerAdapter(sliderImages)
-
-
         // 미션 관련 부분
-        val missionContainer = binding.homeMissionListContainer
+        val missionContainer = binding.adminMissionListContainer
         // 미션 데이터 2차원 배열
         val mission_content = arrayOf(
             //
@@ -93,14 +76,14 @@ class HomeFragment : Fragment() {
 
         // 함수 이용
         renderMissions { mission -> mission[2] == "1" }
-        binding.homeButtonTypeMission1.setOnClickListener {
+        binding.adminMissionButtonTypeMission1.setOnClickListener {
             renderMissions { mission -> mission[2] == "1" }
         }
-        binding.homeButtonTypeMission2.setOnClickListener {
-            renderMissions { mission -> mission[1] == "1" }
+        binding.adminMissionButtonTypeMission2.setOnClickListener {
+            renderMissions { mission -> mission[2] == "2" }
         }
-        binding.homeButtonTypeMission3.setOnClickListener {
-            renderMissions { mission -> mission[1] == "0" }
+        binding.adminMissionButtonTypeMission3.setOnClickListener {
+            renderMissions { mission -> mission[2] == "3" }
         }
         return root
     }

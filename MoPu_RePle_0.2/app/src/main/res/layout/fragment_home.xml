@@ -122,13 +122,15 @@
             android:text="승인 대기 미션 \n 오늘도 환경을 잘 부탁해" />
 
 
-        <!-- 미션박스의 80% 너비를 위함 -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <!-- 미션 박스들용 linear layout -->
+        <LinearLayout
+            android:id="@+id/home_mission_list_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/home_text_mission" />
     </LinearLayout>
 
 
