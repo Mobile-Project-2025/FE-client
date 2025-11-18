@@ -18,6 +18,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
 import android.content.Context
+import android.util.Log
 
 class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
@@ -31,9 +32,6 @@ class LoginFragment : Fragment() {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // 여기 위에까지는 기본코드
-
-
         // 상단에 아이콘, 텍스트 2개
         binding.loginIcon
         binding.loginRePle1
@@ -43,7 +41,6 @@ class LoginFragment : Fragment() {
         binding.loginButton.setOnClickListener {
             val value_login_ID = binding.loginID.text.toString()  // 아이디 입력칸
             val value_login_PW = binding.loginPW.text.toString()  // 비밀번호 입력칸
-
 
             // 아이디, 입력칸을 비워놓지는 않았는가?
             while (true) {
@@ -76,15 +73,9 @@ class LoginFragment : Fragment() {
                     "ID == $value_login_ID, PW == $value_login_PW",
                     Toast.LENGTH_SHORT
                 ).show()
-                //
-                //
-                //
-                //
                 // 아래 findNav 주석처리 하면, 로그인 실패해도 자동으로 안 넘어가고, 로그인 화면에 머무름
-                findNavController().navigate(R.id.move_login_to_home)
+                // findNavController().navigate(R.id.move_login_to_home)
                 break
-
-
 
 
 //                // 로그인 실패 == 다이얼로그 메시지
@@ -98,10 +89,17 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // 회원가입 하기 버튼 == 회원가입 페이지로 이동
+
+        // 버튼 == 화면 이동
+        // 회원가입 버튼 == 회원가입 페이지로 이동
         binding.loginMovetoSignup.setOnClickListener {
             findNavController().navigate(R.id.move_login_to_signup)
         }
+        // 관리자 화면 버튼 == 관리자 메인 페이지로 이동
+        binding.loginMovetoTempAdmin.setOnClickListener {
+            findNavController().navigate(R.id.move_login_to_admin_main)
+        }
+
         return root
     }
     override fun onDestroyView() {
@@ -140,32 +138,25 @@ class LoginFragment : Fragment() {
 
             override fun onResponse(call: Call, response: Response) {
                 val bodyStr = response.body?.string()
+
+                // return 코드 확인용 로그캣
+                Log.d("로그인 return 코드값", "로그인 return 코드값 = ${response.code}, body = $bodyStr")
+
                 activity?.runOnUiThread {
                     if (response.isSuccessful && bodyStr != null) {
-                        // 응답 예시: {"accessToken":"...","nickname":"...","role":"STUDENT"}
                         try {
                             val obj = JSONObject(bodyStr)
                             val token = obj.optString("accessToken")
                             val nickname = obj.optString("nickname")
                             val role = obj.optString("role")
 
-                            // 토큰 저장 (TokenStore - Interceptor가 자동으로 사용)
-                            TokenStore.save(requireContext(), token)
-
-                            // 토큰 저장 (SharedPreferences)
-                            val sp = requireContext().getSharedPreferences("auth", 0)
-                            sp.edit()
-                                .putString("accessToken", token)
-                                .putString("nickname", nickname)
-                                .putString("role", role)
-                                .apply()
-
+                            // 로그인 성공 (코드: 200) == return값 3개 저장
+                            TokenStore.saveAll(requireContext(), token, nickname, role)
                             Toast.makeText(
                                 requireContext(),
-                                "로그인 성공: ${nickname}",
+                                "로그인 성공: $nickname",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            // 홈으로 이동
                             findNavController().navigate(R.id.move_login_to_home)
                         } catch (t: Throwable) {
                             AlertDialog.Builder(requireContext()).run {
@@ -191,15 +182,39 @@ class LoginFragment : Fragment() {
 
 object TokenStore {
     private const val SP = "auth"
-    private const val KEY = "accessToken"
+    private const val KEY_TOKEN = "accessToken"
+    private const val KEY_NICKNAME = "nickname"
+    private const val KEY_ROLE = "role"
 
-    fun save(context: Context, token: String?) {
+    // 세 값 한 번에 저장
+    fun saveAll(context: Context, token: String?, nickname: String?, role: String?) {
         if (token.isNullOrBlank()) return
-        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY, token).apply()
+        val sp = context.getSharedPreferences(SP, Context.MODE_PRIVATE)
+        sp.edit()
+            .putString(KEY_TOKEN, token)
+            .putString(KEY_NICKNAME, nickname)
+            .putString(KEY_ROLE, role)
+            .apply()
     }
-    fun get(context: Context): String? = context.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY, null)
+
+    // 기존 Interceptor에서 쓰는 토큰용
+    fun getToken(context: Context): String? =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
+            .getString(KEY_TOKEN, null)
+
+    fun getNickname(context: Context): String? =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
+            .getString(KEY_NICKNAME, null)
+
+    fun getRole(context: Context): String? =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
+            .getString(KEY_ROLE, null)
+
     fun clear(context: Context) {
-        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().remove(KEY).apply()
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
     }
 }
 
@@ -208,6 +223,7 @@ class AuthInterceptor(private val context: Context) : Interceptor {
         "/api/auth/login",
         "/api/auth/signup"
     )
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
         val urlPath = original.url.encodedPath
@@ -218,15 +234,21 @@ class AuthInterceptor(private val context: Context) : Interceptor {
             .header("Accept", "application/json")
 
         if (shouldAttach) {
-            val token = TokenStore.get(context)
+            val token = TokenStore.getToken(context)   // 👈 변경
             if (!token.isNullOrBlank()) {
-                reqBuilder.header("Authorization", "Bearer $token") // Bearer 추가
+                reqBuilder.header("Authorization", "Bearer $token")
             }
         }
 
-        val response = chain.proceed(reqBuilder.build())
+        val request = reqBuilder.build()
+        val response = chain.proceed(request)
 
-        // 코드 == 401
+        // API return 코드 로그로
+        Log.d(
+            "HTTP",
+            "url=${response.request.url}, method=${response.request.method}, code=${response.code}"
+        )
+
         if (response.code == 401) {
             TokenStore.clear(context)
         }
@@ -247,9 +269,3 @@ object HttpClientProvider {
         }
     }
 }
-
-// val token = requireContext().getSharedPreferences("auth", 0).getString("accessToken", null)
-// val authedRequest = Request.Builder()
-//     .url("http://43.202.225.195:8080/your/api")
-//     .addHeader("Authorization", "Bearer ${token}")
-//     .build()
