@@ -10,8 +10,8 @@
         android:id="@+id/home_mission_box_mode"
         android:layout_width="0dp"
         android:layout_height="90dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/border_box_gray"
         android:gravity="center"
         android:orientation="horizontal"
@@ -21,7 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.8">
+        app:layout_constraintWidth_percent="0.85">
 
         <ImageView
             android:id="@+id/home_mission_icon_mode"

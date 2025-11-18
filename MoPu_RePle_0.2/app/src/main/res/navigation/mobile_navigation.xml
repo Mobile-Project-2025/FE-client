@@ -5,42 +5,95 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_login">
 
+
+    <!-- 로그인, 회원가입 관련 -->
     <fragment
         android:id="@+id/navigation_login"
         android:name="com.example.myapplication.ui.Log_in.LoginFragment"
         android:label="@string/title_login"
         tools:layout="@layout/fragment_login" >
 
+        <!-- 홈 화면으로 이동 -->
         <action
             android:id="@+id/move_login_to_home"
             app:destination="@+id/navigation_home" />
 
+        <!-- 회원가입 화면으로 이동 -->
         <action
             android:id="@+id/move_login_to_signup"
             app:destination="@+id/navigation_signup" />
+
+        <!-- 관리자 메인 화면으로 이동 -->
+        <action
+            android:id="@+id/move_login_to_admin_main"
+            app:destination="@+id/navigation_admin_main" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_signup"
         android:name="com.example.myapplication.ui.Sign_up.SignupFragment"
         android:label="@string/title_signup"
-        tools:layout="@layout/fragment_signup" />
+        tools:layout="@layout/fragment_signup" >
 
+        <!-- 로그인 화면으로 이동, 회원가입 성공 시 -->
+        <action
+            android:id="@+id/move_signup_to_login"
+            app:destination="@+id/navigation_login" />
+    </fragment>
+
+
+    <!-- 하단 네비바 3개 == 홈, 포인트, 마이 페이지 -->
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.example.myapplication.ui.Home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+
+        <!-- 홈에서 미션박스 클릭 시, 인증으로 이동 구현 -->
+        <action
+            android:id="@+id/move_home_to_camera"
+            app:destination="@+id/navigation_mission_camera" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_point"
         android:name="com.example.myapplication.ui.Point.PointFragment"
         android:label="@string/title_point"
-        tools:layout="@layout/fragment_point"/>
+        tools:layout="@layout/fragment_point" />
 
     <fragment
         android:id="@+id/navigation_my_page"
         android:name="com.example.myapplication.ui.My_page.My_pageFragment"
         android:label="@string/title_my_page"
-        tools:layout="@layout/fragment_my_page"/>
+        tools:layout="@layout/fragment_my_page" />
+
+
+    <!-- 미션 관련 화면 == 카메라 인증 -->
+        <fragment
+            android:id="@+id/navigation_mission_camera"
+            android:name="com.example.myapplication.ui.Mission_Camera.Mission_CameraFragment"
+            android:label="@string/title_mission_camera"
+            tools:layout="@layout/fragment_mission_camera" />
+
+
+
+    <!-- 관리자 화면 -->
+    <fragment
+        android:id="@+id/navigation_admin_main"
+        android:name="com.example.myapplication.ui.Admin_Main.AdminMainFragment"
+        android:label="@string/title_admin_main"
+        tools:layout="@layout/fragment_admin_main" >
+
+        <!-- 관리자 미션 목록 화면으로 이동 -->
+        <action
+            android:id="@+id/move_admin_main_to_admin_mission_list"
+            app:destination="@+id/navigation_admin_mission_list" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_admin_mission_list"
+        android:name="com.example.myapplication.ui.Admin_MissionList.AdminMissionListFragment"
+        android:label="@string/title_admin_mission_list"
+        tools:layout="@layout/fragment_admin_mission_list" />
+
 </navigation>

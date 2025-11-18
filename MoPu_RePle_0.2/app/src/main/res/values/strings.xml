@@ -5,4 +5,7 @@
     <string name="title_home">Home</string>
     <string name="title_point">Point</string>
     <string name="title_my_page">My Page</string>
+    <string name="title_admin_main">Admin_Main</string>
+    <string name="title_admin_mission_list">Admin_MissionList</string>
+    <string name="title_mission_camera">Mission_Camera</string>
 </resources>
