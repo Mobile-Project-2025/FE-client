@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.example.myapplication.R
@@ -44,11 +45,19 @@ class PointFragment : Fragment() {
         categories.forEachIndexed { index, name ->
             val chip = layoutInflater.inflate(R.layout.view_chip_filter, binding.chipGroup, false) as Chip
             chip.text = name
-            chip.isChecked = index == 2
+            chip.isChecked = index == 0
             binding.chipGroup.addView(chip)
         }
 
-        adapter = RewardAdapter()
+        adapter = RewardAdapter { item ->
+            val action = PointFragmentDirections.actionPointFragmentToRewardDetailFragment(
+                brand = item.brand,
+                title = item.title,
+                price = item.price,
+                imageRes = item.imageRes
+            )
+            findNavController().navigate(action)
+        }
         binding.recyclerRewards.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerRewards.adapter = adapter
 

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- [추가됨] 상단 뒤로가기 바 (헤더) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 뒤로가기 버튼 (화살표 이미지 대신 텍스트로 안전하게 넣음) -->
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:paddingEnd="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="상품 상세"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/header_bar"
+        app:layout_constraintBottom_toTopOf="@id/btnPurchase"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="30dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="상품 이미지 &amp; 상품명 표시"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="16dp"/>
+
+                <ImageView
+                    android:id="@+id/imgReward"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:id="@+id/tvRewardBrand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#7A7A7A" />
+
+                <TextView
+                    android:id="@+id/tvRewardTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="4dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12dp">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_coin"
+                        android:layout_marginEnd="4dp"/>
+                    <TextView
+                        android:id="@+id/tvRewardPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFC107" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginVertical="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="기프티콘 이용안내"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"
+                android:paddingStart="24dp"
+                android:paddingVertical="12dp"/>
+
+            <TextView
+                android:id="@+id/tvUsageGuide"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:text="[이용 안내]\n1. 본 상품은 매장 재고 상황에 따라 동일상품으로 교환이 불가할 수 있습니다.\n2. 매장 별 재고 상황에 따라 동일 금액의 타 상품으로 교환이 가능하며, 해당 금액보다 높을 경우 초과 금액을 결제하시면 교환 가능합니다.\n3. 본 쿠폰 교환 시 L.POINT 적립 및 현금영수증 발행 가능합니다.\n4. 타 행사와 중복 적용은 브랜드사 정책에 따릅니다.\n5. 유효기간 이내 사용 가능합니다.\n6. 매장 방문 주문 시에만 사용 가능합니다.\n7. 상기 이미지는 연출된 것으로 실제와 다를 수 있습니다.\n8. 홈서비스(배달), 잇츠오더에서 사용 불가합니다.\n9. 환불, 교환, 승인에 대한 문의는 쿠폰 구매처에 문의하시기 바랍니다.\n(롯데리아는 쿠폰의 구매처가 아니고 사용처 입니다.)\n\n*본 모바일 쿠폰은 무상제공(B2B) 발송 상품으로 유효기간 연장 및 환불 대상이 아닙니다.\n\n[이용가능매장 안내]\n■ 롯데리아 국내 전 매장(단, 공항, 리조트 및 휴게소, 위락시설 주변 매장 등 특수매장 및 일부 점포 제외)"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnPurchase"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="구매하기"
+        android:textSize="18sp"
+        android:layout_marginBottom="60dp"
+        android:paddingVertical="12dp"
+        android:backgroundTint="#8BC34A"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
