@@ -65,7 +65,6 @@ class LoginFragment : Fragment() {
                     break
                 }
 
-
                 // 로그인 성공 == (임시) 토스트로 로그 띄우고, 홈화면으로 이동
                 POST_login_request(value_login_ID, value_login_PW)  // 로그인 api 요청
                 Toast.makeText(
@@ -76,19 +75,8 @@ class LoginFragment : Fragment() {
                 // 아래 findNav 주석처리 하면, 로그인 실패해도 자동으로 안 넘어가고, 로그인 화면에 머무름
                 // findNavController().navigate(R.id.move_login_to_home)
                 break
-
-
-//                // 로그인 실패 == 다이얼로그 메시지
-//                AlertDialog.Builder(requireContext()).run {
-//                    setTitle("로그인 실패")
-//                    setIcon(android.R.drawable.ic_dialog_alert)
-//                    setMessage("학번, 비밀번호를 다시 확인해주세요")
-//                    setPositiveButton("OK", null)
-//                    show()
-//                }
             }
         }
-
 
         // 버튼 == 화면 이동
         // 회원가입 버튼 == 회원가입 페이지로 이동
@@ -102,11 +90,11 @@ class LoginFragment : Fragment() {
 
         return root
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
 
     // 로그인 요청 function 함수
     private fun POST_login_request(ID: String, Password: String) {
@@ -157,7 +145,14 @@ class LoginFragment : Fragment() {
                                 "로그인 성공: $nickname",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            findNavController().navigate(R.id.move_login_to_home)
+
+                            // 여기만 수정한 부분: role 값에 따라 분기
+                            if (role.equals("ADMIN", ignoreCase = true)) {
+                                findNavController().navigate(R.id.move_login_to_admin_main)
+                            } else {
+                                findNavController().navigate(R.id.move_login_to_home)
+                            }
+
                         } catch (t: Throwable) {
                             AlertDialog.Builder(requireContext()).run {
                                 setTitle("응답 파싱 실패")
