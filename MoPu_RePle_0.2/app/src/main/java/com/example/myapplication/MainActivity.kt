@@ -28,24 +28,32 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
 
-                // 액션바, 네비바 둘 다 안 보임 == login, signup, admin_main, admin_mission_list
-                R.id.navigation_login, R.id.navigation_signup, R.id.navigation_admin_main, R.id.navigation_admin_mission_list -> {
+                // 액션바, 네비바 둘 다 안 보임
+                R.id.navigation_login,
+                R.id.navigation_signup,
+                R.id.navigation_admin_main,
+                R.id.navigation_admin_mission_list,
+                R.id.navigation_admin_mission_create -> {   // ← 여기에 추가!
                     supportActionBar?.hide()
                     binding.navView.visibility = View.GONE
                 }
 
-                // 액션바만 숨기고, 네비바는 살아있음 == home, point, my page
-                R.id.navigation_home, R.id.navigation_point, R.id.navigation_my_page, R.id.navigation_mission_camera -> {
+                // 액션바만 숨기고 네비바는 보임
+                R.id.navigation_home,
+                R.id.navigation_point,
+                R.id.navigation_my_page,
+                R.id.navigation_mission_camera -> {
                     supportActionBar?.hide()
                     binding.navView.visibility = View.VISIBLE
                 }
 
-                // 보임 == 다른화면들
+                // 기본: 둘 다 보임
                 else -> {
                     supportActionBar?.show()
                     binding.navView.visibility = View.VISIBLE
                 }
             }
+
         }
 
 
