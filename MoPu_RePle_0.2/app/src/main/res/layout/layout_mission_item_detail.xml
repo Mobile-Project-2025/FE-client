@@ -149,7 +149,7 @@
         android:layout_height="wrap_content"
         android:text="구매하기"
         android:textSize="18sp"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="80dp"
         android:paddingVertical="12dp"
         android:backgroundTint="#8BC34A"
         app:layout_constraintBottom_toBottomOf="parent"

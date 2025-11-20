@@ -6,17 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentPointBinding
+import com.example.myapplication.ui.UserViewModel
 
 class PointFragment : Fragment() {
 
     private var _binding: FragmentPointBinding? = null
     private val binding get() = _binding!!
-
+    private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var adapter: RewardAdapter
 
     private val categories = listOf("전체", "편의점", "뷰티", "카페", "치킨/피자")
@@ -39,7 +41,9 @@ class PointFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.tvNickname.text = "홍길동님"
-        binding.tvPoints.text = "10800P"
+        userViewModel.userPoints.observe(viewLifecycleOwner) { points ->
+            binding.tvPoints.text = "${points}P"
+        }
 
         binding.chipGroup.removeAllViews()
         categories.forEachIndexed { index, name ->

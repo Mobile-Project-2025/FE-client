@@ -6,18 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.databinding.LayoutMissionItemDetailBinding
+import com.example.myapplication.ui.UserViewModel
 import java.text.NumberFormat
 import java.util.Locale
-
+import android.graphics.Color
+import android.widget.Toast
 class RewardDetailFragment : Fragment() {
 
     private var _binding: LayoutMissionItemDetailBinding? = null
     private val binding get() = _binding!!
 
     private val args: RewardDetailFragmentArgs by navArgs()
+    private val userViewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +49,30 @@ class RewardDetailFragment : Fragment() {
         binding.tvRewardTitle.text = title
         binding.tvRewardPrice.text = formattedPrice + " 캐시"
 
-        // [핵심 2] 우리가 만든 XML 속의 뒤로가기 버튼(btnBack)에 기능을 연결합니다.
+        userViewModel.userPoints.observe(viewLifecycleOwner) { myPoints ->
+            if (myPoints >= price) {
+                binding.btnPurchase.isEnabled = true
+                binding.btnPurchase.text = "구매하기"
+                binding.btnPurchase.setBackgroundColor(Color.parseColor("#8BC34A")) // 활성 색상 (초록)
+            } else {
+                binding.btnPurchase.isEnabled = false
+                binding.btnPurchase.text = "포인트 부족"
+                binding.btnPurchase.setBackgroundColor(Color.LTGRAY) // 비활성 색상 (회색)
+            }
+        }
+
+        binding.btnPurchase.setOnClickListener {
+            val isSuccess = userViewModel.deductPoints(price)
+
+            if (isSuccess) {
+                Toast.makeText(context, "구매가 완료되었습니다!", Toast.LENGTH_SHORT).show()
+
+                findNavController().popBackStack()
+            } else {
+                Toast.makeText(context, "잔액이 부족합니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         binding.btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
