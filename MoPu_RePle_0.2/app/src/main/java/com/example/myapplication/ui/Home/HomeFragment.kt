@@ -47,11 +47,14 @@ class HomeFragment : Fragment() {
         val pager = binding.homeImgSlide1 // ViewBinding 사용
         val sliderImages = listOf(
             R.drawable.horse_picture,
-            R.drawable.horse_picture, // 실제 존재하는 이미지 리소스로 변경 필요할 수 있음
-            R.drawable.horse_picture
+            R.drawable.main_banner1, // 실제 존재하는 이미지 리소스로 변경 필요할 수 있음
+            R.drawable.main_banner2
         )
         pager.adapter = ImagePagerAdapter(sliderImages)
 
+        binding.homeImgButtonSeeAll.setOnClickListener {
+            findNavController().navigate(R.id.navigation_gallery)
+        }
 
         // 2. 리사이클러뷰(미션 목록) 설정
         setupRecyclerView()

@@ -120,4 +120,10 @@
         android:label="@string/title_admin_mission_list"
         tools:layout="@layout/fragment_admin_mission_list" />
 
+    <fragment
+        android:id="@+id/navigation_gallery"
+        android:name="com.example.myapplication.ui.Home.GalleryFragment"
+        android:label="GalleryFragment"
+        tools:layout="@layout/fragment_gallery" />
+
 </navigation>
