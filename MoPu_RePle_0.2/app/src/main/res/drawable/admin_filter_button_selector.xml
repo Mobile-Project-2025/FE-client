@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 선택 상태 -->
+    <item
+        android:state_selected="true"
+        android:drawable="@drawable/admin_filter_bg_selected" />
+
+    <!-- 기본 상태 -->
+    <item android:drawable="@drawable/admin_filter_bg_unselected" />
+</selector>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -17,67 +18,56 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <!-- 미션 박스 컨테이너 -->
+    <!-- 필터 버튼들 (위에 고정) -->
     <LinearLayout
-        android:id="@+id/admin_mission_list_linear0"
-        android:layout_width="match_parent"
+        android:id="@+id/admin_mission_list_linear_button"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="80dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/admin_mission_list_text_gwanliza"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- 3개의 미션 버튼 -->
-        <LinearLayout
-            android:id="@+id/admin_mission_list_linear_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="parent">
+        <Button
+            android:id="@+id/admin_mission_button_type_mission_all"
+            style="@style/AdminFilterButton"
+            android:text="전체 미션" />
 
-            <Button
-                android:id="@+id/admin_mission_button_type_mission_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:backgroundTint="@color/eco_green_bright"
-                android:text="승인 대기 미션" />
+        <Button
+            android:id="@+id/admin_mission_button_type_mission_1"
+            style="@style/AdminFilterButton"
+            android:text="승인 대기 미션" />
 
-            <Button
-                android:id="@+id/admin_mission_button_type_mission_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:backgroundTint="@color/eco_green_bright"
-                android:text="마감된 미션" />
+        <Button
+            android:id="@+id/admin_mission_button_type_mission_2"
+            style="@style/AdminFilterButton"
+            android:text="마감된 미션" />
 
-            <Button
-                android:id="@+id/admin_mission_button_type_mission_3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:backgroundTint="@color/eco_green_bright"
-                android:text="종료 미션" />
-        </LinearLayout>
-        
-        
-        <!-- 미션 박스들용 linear layout -->
+        <Button
+            android:id="@+id/admin_mission_button_type_mission_3"
+            style="@style/AdminFilterButton"
+            android:text="종료 미션" />
+    </LinearLayout>
+
+    <!-- 미션 카드들: 스크롤 가능 영역 -->
+    <ScrollView
+        android:id="@+id/admin_mission_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/admin_mission_list_linear_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- ScrollView는 자식 1개만 가능 → 이 안에 미션 카드들 쌓임 -->
         <LinearLayout
             android:id="@+id/admin_mission_list_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/admin_mission_list_linear_button" />
-    </LinearLayout>
-
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

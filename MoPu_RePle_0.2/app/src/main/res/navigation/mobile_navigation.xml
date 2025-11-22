@@ -54,22 +54,21 @@
         android:id="@+id/navigation_point"
         android:name="com.example.myapplication.ui.Point.PointFragment"
         android:label="@string/title_point"
-        tools:layout="@layout/fragment_point"/>
+        tools:layout="@layout/fragment_point" />
 
     <!-- 마이페이지 -->
     <fragment
         android:id="@+id/navigation_my_page"
         android:name="com.example.myapplication.ui.My_page.My_pageFragment"
         android:label="@string/title_my_page"
-        tools:layout="@layout/fragment_my_page"/>
+        tools:layout="@layout/fragment_my_page" />
 
     <!-- 인증 카메라 -->
     <fragment
         android:id="@+id/navigation_mission_camera"
         android:name="com.example.myapplication.ui.Mission_Camera.Mission_CameraFragment"
         android:label="@string/title_mission_camera"
-        tools:layout="@layout/fragment_mission_camera"/>
-
+        tools:layout="@layout/fragment_mission_camera" />
 
     <!-- 관리자 메인 -->
     <fragment
@@ -85,7 +84,6 @@
         <action
             android:id="@+id/move_admin_main_to_admin_mission_list"
             app:destination="@+id/navigation_admin_mission_list" />
-
     </fragment>
 
     <!-- 관리자 미션 생성 -->
@@ -105,6 +103,19 @@
         android:id="@+id/navigation_admin_mission_list"
         android:name="com.example.myapplication.ui.Admin_MissionList.AdminMissionListFragment"
         android:label="@string/title_admin_mission_list"
-        tools:layout="@layout/fragment_admin_mission_list" />
+        tools:layout="@layout/fragment_admin_mission_list">
+
+        <!-- 목록 -> 승인 대기 미션 상세 이동 액션 (여기가 새로 추가된 부분) -->
+        <action
+            android:id="@+id/move_admin_mission_list_to_pending_detail"
+            app:destination="@+id/navigation_admin_pending_mission_detail" />
+    </fragment>
+
+    <!-- 승인 대기 미션 상세 Fragment (새로 추가) -->
+    <fragment
+        android:id="@+id/navigation_admin_pending_mission_detail"
+        android:name="com.example.myapplication.ui.Admin_MissionList.AdminPendingMissionDetailFragment"
+        android:label="승인 대기 미션 상세"
+        tools:layout="@layout/fragment_admin_pending_mission_detail" />
 
 </navigation>
