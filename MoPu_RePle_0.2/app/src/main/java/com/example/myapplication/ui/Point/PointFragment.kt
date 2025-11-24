@@ -40,7 +40,15 @@ class PointFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.tvNickname.text = "홍길동님"
+        // 1. 서버에서 정보 가져오기 요청
+        userViewModel.fetchUserInfo()
+
+        // 2. 닉네임 관찰 및 업데이트 (기존 하드코딩 제거)
+        userViewModel.userNickname.observe(viewLifecycleOwner) { nickname ->
+            binding.tvNickname.text = "${nickname}님"
+        }
+
+        // 3. 포인트 관찰 및 업데이트
         userViewModel.userPoints.observe(viewLifecycleOwner) { points ->
             binding.tvPoints.text = "${points}P"
         }

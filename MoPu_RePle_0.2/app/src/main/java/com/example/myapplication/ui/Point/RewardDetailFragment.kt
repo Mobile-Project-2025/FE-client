@@ -15,6 +15,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import android.graphics.Color
 import android.widget.Toast
+
 class RewardDetailFragment : Fragment() {
 
     private var _binding: LayoutMissionItemDetailBinding? = null
@@ -34,7 +35,7 @@ class RewardDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // [핵심 1] 이 화면에 들어오면 '기본 상단바(Action Bar)'를 숨깁니다.
+        // 상단바 숨기기
         (activity as? AppCompatActivity)?.supportActionBar?.hide()
 
         val brand = args.brand
@@ -49,28 +50,32 @@ class RewardDetailFragment : Fragment() {
         binding.tvRewardTitle.text = title
         binding.tvRewardPrice.text = formattedPrice + " 캐시"
 
+        // 1. 내 포인트 상태에 따라 버튼 활성화/비활성화 (기존 유지)
         userViewModel.userPoints.observe(viewLifecycleOwner) { myPoints ->
             if (myPoints >= price) {
                 binding.btnPurchase.isEnabled = true
                 binding.btnPurchase.text = "구매하기"
-                binding.btnPurchase.setBackgroundColor(Color.parseColor("#8BC34A")) // 활성 색상 (초록)
+                binding.btnPurchase.setBackgroundColor(Color.parseColor("#8BC34A"))
             } else {
                 binding.btnPurchase.isEnabled = false
                 binding.btnPurchase.text = "포인트 부족"
-                binding.btnPurchase.setBackgroundColor(Color.LTGRAY) // 비활성 색상 (회색)
+                binding.btnPurchase.setBackgroundColor(Color.LTGRAY)
             }
         }
 
-        binding.btnPurchase.setOnClickListener {
-            val isSuccess = userViewModel.deductPoints(price)
-
+        // [수정됨] 2. 구매 성공 여부 관찰 (서버 응답이 오면 실행됨)
+        userViewModel.purchaseSuccess.observe(viewLifecycleOwner) { isSuccess ->
             if (isSuccess) {
                 Toast.makeText(context, "구매가 완료되었습니다!", Toast.LENGTH_SHORT).show()
-
+                // 성공 시 뒤로 가기
                 findNavController().popBackStack()
-            } else {
-                Toast.makeText(context, "잔액이 부족합니다.", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        // [수정됨] 3. 버튼 클릭 시 서버에 요청 보내기
+        binding.btnPurchase.setOnClickListener {
+            // 더 이상 결과를 변수(val)로 받지 않고, 뷰모델에 "요청해줘!"라고 명령만 내립니다.
+            userViewModel.purchaseItem(price)
         }
 
         binding.btnBack.setOnClickListener {
@@ -80,7 +85,6 @@ class RewardDetailFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // [핵심 3] 이 화면을 나갈 때는 다시 '기본 상단바'를 보여줍니다. (다른 화면을 위해)
         (activity as? AppCompatActivity)?.supportActionBar?.show()
         _binding = null
     }
