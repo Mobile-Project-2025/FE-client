@@ -7,7 +7,7 @@ import com.example.myapplication.databinding.ItemRewardBinding
 import java.text.NumberFormat
 import java.util.Locale
 
-class RewardAdapter(val onClick: (RewardItem) -> Unit) : RecyclerView.Adapter<RewardAdapter.VH>() {
+class RewardAdapter : RecyclerView.Adapter<RewardAdapter.VH>() {
 
     private val items = mutableListOf<RewardItem>()
     private val nf = NumberFormat.getInstance(Locale.KOREA)
@@ -34,10 +34,6 @@ class RewardAdapter(val onClick: (RewardItem) -> Unit) : RecyclerView.Adapter<Re
             b.tvBrand.text = item.brand
             b.tvTitle.text = item.title
             b.tvPrice.text = nf.format(item.price)
-
-            itemView.setOnClickListener {
-                onClick(item)
-            }
         }
     }
 }
