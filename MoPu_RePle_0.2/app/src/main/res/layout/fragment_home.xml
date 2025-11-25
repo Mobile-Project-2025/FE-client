@@ -137,11 +137,12 @@
 
 
         <!-- 미션 박스들용 linear layout -->
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/home_mission_list_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/home_text_mission" />
