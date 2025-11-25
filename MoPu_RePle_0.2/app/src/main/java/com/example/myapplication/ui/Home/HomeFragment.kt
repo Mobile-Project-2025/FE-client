@@ -35,6 +35,9 @@ class HomeFragment : Fragment() {
     // [검색 핵심] API로 받아온 전체 데이터를 저장해둘 리스트
     private var allLoadedMissions = listOf<Mission_Data>()
 
+    // [핵심 추가] 현재 어떤 미션을 보고 있는지 추적 (regular, event, pending)
+    private var currentType = "regular"
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -44,10 +47,10 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         // 1. 이미지 좌우 슬라이드 영역 설정
-        val pager = binding.homeImgSlide1 // ViewBinding 사용
+        val pager = binding.homeImgSlide1
         val sliderImages = listOf(
             R.drawable.horse_picture,
-            R.drawable.main_banner1, // 실제 존재하는 이미지 리소스로 변경 필요할 수 있음
+            R.drawable.main_banner1,
             R.drawable.main_banner2
         )
         pager.adapter = ImagePagerAdapter(sliderImages)
@@ -72,22 +75,28 @@ class HomeFragment : Fragment() {
         })
 
 
-        // 4. "승인 대기 미션" (예시: 현재는 기능 없음, 필요시 추가)
+        // 4. [수정됨] "승인 대기 미션" 버튼 클릭
         binding.homeButtonTypeMission1.setOnClickListener {
-            Toast.makeText(context, "승인 대기 미션 목록 불러오기(구현 필요)", Toast.LENGTH_SHORT).show()
+            binding.homeTextMission.text = "승인 대기 미션 목록"
+            loadMissions("pending")
         }
 
 
-        // 5. "상시 미션" 버튼 클릭 시 -> API 호출
+        // 5. "상시 미션" 버튼 클릭 시
         binding.homeButtonTypeMission2.setOnClickListener {
+            binding.homeTextMission.text = "상시 미션 \n오늘도 환경을 잘 부탁해"
             loadMissions("regular")
         }
 
 
-        // 6. "돌발 미션" 버튼 클릭 시 -> API 호출
+        // 6. "돌발 미션" 버튼 클릭 시
         binding.homeButtonTypeMission3.setOnClickListener {
+            binding.homeTextMission.text = "지금만 할 수 있는 \n돌발 미션!"
             loadMissions("event")
         }
+
+        // 초기 화면 로딩 (상시 미션)
+        loadMissions("regular")
 
         return root
     }
@@ -95,15 +104,28 @@ class HomeFragment : Fragment() {
     // 리사이클러뷰 초기화 함수
     private fun setupRecyclerView() {
         missionAdapter = MissionAdapter { mission ->
-            // 아이템 클릭 시 상세/인증 화면으로 이동
-            val bundle = Bundle().apply {
-                putInt("missionId", mission.missionId.toInt())
-                putString("title", mission.title)
-                putInt("missionPoint", mission.missionPoint)
-                putString("createdAt", mission.createdAt)
-                putString("iconImageUrl", mission.iconImageUrl)
+            // [핵심 수정] 아이템 클릭 시 현재 탭 종류에 따라 이동 경로 분기 처리
+
+            if (currentType == "pending") {
+                // 1. 승인 대기 미션 -> 상세 화면(Detail)으로 이동
+                // 승인 대기 미션은 participationId가 반드시 존재함
+                val participationId = mission.participationId ?: 0L
+
+                // mobile_navigation.xml에 추가한 action ID를 사용하여 이동
+                val action = HomeFragmentDirections.actionHomeToHistoryDetail(participationId)
+                findNavController().navigate(action)
+
+            } else {
+                // 2. 상시/돌발 미션 -> 카메라 인증 화면으로 이동 (기존 로직 유지)
+                val bundle = Bundle().apply {
+                    putInt("missionId", mission.missionId.toInt())
+                    putString("title", mission.title)
+                    putInt("missionPoint", mission.missionPoint)
+                    putString("createdAt", mission.createdAt)
+                    putString("iconImageUrl", mission.iconImageUrl)
+                }
+                findNavController().navigate(R.id.move_home_to_camera, bundle)
             }
-            findNavController().navigate(R.id.move_home_to_camera, bundle)
         }
 
         // XML에서 home_mission_list_container가 RecyclerView여야 함
@@ -115,15 +137,38 @@ class HomeFragment : Fragment() {
 
     // API 통신 및 데이터 로드 함수 통합
     private fun loadMissions(type: String) {
+        currentType = type // [중요] 현재 탭 상태 저장
+
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val api = ApiClient.getMissionsApi(requireContext())
+                val missions: List<Mission_Data>
 
-                // 타입에 따라 다른 API 함수 호출
-                val missions = if (type == "regular") {
-                    api.getRegularMissions()
+                // 타입에 따라 다른 API 함수 호출 및 데이터 처리
+                if (type == "pending") {
+                    // [승인 대기] API 호출
+                    val pendingList = api.getPendingMissions()
+
+                    // PendingMission 데이터를 Mission_Data 형태로 변환 (어댑터 재사용을 위해)
+                    missions = pendingList.map { pending ->
+                        Mission_Data(
+                            missionId = pending.missionId,
+                            title = pending.title,
+                            missionPoint = pending.missionPoint,
+                            category = pending.category,
+                            iconImageUrl = pending.iconImageUrl,
+                            bannerImageUrl = null, // 상세 화면에서 다시 로드하므로 null 처리
+                            participationCount = 0, // 대기 목록에서는 참가 인원 0 또는 숨김 처리
+                            createdAt = pending.submittedAt, // 제출일시를 생성일시 위치에 저장
+                            participationId = pending.participationId // [중요] 상세 이동을 위한 ID 저장
+                        )
+                    }
+                } else if (type == "regular") {
+                    // [상시] API 호출
+                    missions = api.getRegularMissions()
                 } else {
-                    api.getEventMissions()
+                    // [돌발] API 호출
+                    missions = api.getEventMissions()
                 }
 
                 Log.d("MissionAPI", "get${type}Missions 성공, size = ${missions.size}")
@@ -135,10 +180,10 @@ class HomeFragment : Fragment() {
                 // [중요] 1. 전체 데이터를 변수에 저장 (검색을 위해)
                 allLoadedMissions = missions
 
-                // [중요] 2. 화면에 뿌리기 (처음엔 전체 다 보여줌)
+                // [중요] 2. 화면에 뿌리기
                 missionAdapter.submitList(missions)
 
-                // 3. 검색창 초기화 (선택사항: 목록이 바뀌었으니 검색어 지우기)
+                // 3. 검색창 초기화
                 binding.homeSearch.text.clear()
 
             } catch (e: HttpException) {
@@ -196,7 +241,6 @@ class HomeFragment : Fragment() {
 
     // =====================================================================
     // 내부 클래스 2: 미션 리스트 어댑터 (RecyclerView.Adapter)
-    // 기존의 renderMissions 함수를 대체함
     class MissionAdapter(val onClick: (Mission_Data) -> Unit) :
         RecyclerView.Adapter<MissionAdapter.MissionViewHolder>() {
 

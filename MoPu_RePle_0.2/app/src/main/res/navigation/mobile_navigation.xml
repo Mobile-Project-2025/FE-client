@@ -53,6 +53,10 @@
         <action
             android:id="@+id/move_home_to_camera"
             app:destination="@+id/navigation_mission_camera" />
+
+        <action
+            android:id="@+id/action_home_to_history_detail"
+            app:destination="@id/navigation_history_detail" />
     </fragment>
 
     <fragment
@@ -125,5 +129,26 @@
         android:name="com.example.myapplication.ui.Home.GalleryFragment"
         android:label="GalleryFragment"
         tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/navigation_history_list"
+        android:name="com.example.myapplication.ui.MissionHistory.MissionHistoryFragment"
+        android:label="참여 챌린지 이력"
+        tools:layout="@layout/fragment_mission_history_list">
+
+        <action
+            android:id="@+id/action_historyList_to_detail"
+            app:destination="@id/navigation_history_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_history_detail"
+        android:name="com.example.myapplication.ui.MissionHistory.MissionHistoryDetailFragment"
+        android:label="이력 상세"
+        tools:layout="@layout/fragment_mission_history_detail">
+        <argument
+            android:name="participationId"
+            app:argType="long" />
+    </fragment>
 
 </navigation>

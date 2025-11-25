@@ -40,7 +40,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 // 받아온 데이터 저장 (내부 변수 _ 에 저장)
                 _userId.value = userData.userId
                 _userNickname.value = userData.nickname
-                _userPoints.value = userData.point
+                _userPoints.value = userData.cumulativePoint
 
 
             } catch (e: Exception) {
@@ -69,7 +69,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 val api = ApiClient.getUserApi(getApplication())
                 val requestBody = PointRequest(point = newPoint)
 
-                // 서버 통신
+                // [수정됨] 결과를 변수에 담지 않고 호출만 수행 (성공하면 다음 줄로 넘어감)
                 api.updateUserPoint(myId, requestBody)
 
                 // 3) 성공 시: 프론트엔드 포인트 즉시 갱신
@@ -77,7 +77,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
                 // 화면에 "성공했어요" 신호 보내기
                 _purchaseSuccess.value = true
-                _purchaseSuccess.value = false // 이벤트 초기화
+                _purchaseSuccess.value = false
 
             } catch (e: Exception) {
                 Log.e("UserViewModel", "포인트 업데이트 실패", e)

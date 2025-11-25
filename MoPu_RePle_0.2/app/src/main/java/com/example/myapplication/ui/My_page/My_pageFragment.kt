@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.myapplication.databinding.FragmentMyPageBinding
 import com.example.myapplication.ui.UserViewModel
+import androidx.navigation.fragment.findNavController
+import com.example.myapplication.R
 
 class My_pageFragment : Fragment() {
 
@@ -45,9 +47,14 @@ class My_pageFragment : Fragment() {
         }
 
         // [추가] 4. 포인트가 바뀌면 화면에 바로 반영
-        userViewModel.userPoints.observe(viewLifecycleOwner) { points ->
+        userViewModel.userPoints.observe(viewLifecycleOwner) { cumulativePoint ->
             // fragment_my_page.xml의 user_point 아이디에 연결
-            binding.userPoint.text = "${points}p"
+            binding.userPoint.text = "${cumulativePoint}p"
+        }
+
+        binding.mpChallenge.setOnClickListener {
+            findNavController().navigate(R.id.navigation_history_list)
+            // 위에서 정의한 프래그먼트 ID 사용
         }
     }
 

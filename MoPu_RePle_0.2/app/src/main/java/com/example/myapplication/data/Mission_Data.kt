@@ -8,7 +8,8 @@ data class Mission_Data(
     val missionPoint: Int,
     val category: String,
     val iconImageUrl: String,
-    val bannerImageUrl: String,
+    val bannerImageUrl: String?,
     val participationCount: Int?,
-    val createdAt: String
+    val createdAt: String,
+    val participationId: Long? = null
 )
