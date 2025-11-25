@@ -18,9 +18,6 @@ interface Mission_API {
     @GET("api/missions/event")
     suspend fun getEventMissions(): List<Mission_Data>
 
-    @GET("api/missions/pending")
-    suspend fun getPendingMissions(): List<PendingMission>
-
 // 미션 인증 사진 업로드 API (미완)
 //    @Multipart
 //    @POST("api/missions/participate")
@@ -28,13 +25,5 @@ interface Mission_API {
 //        @Part("missionId") missionId: Int,
 //        @Part image: MultipartBody.Part
 //    ): UploadResponse
-// 참여 이력 리스트 조회
-    @GET("api/missions/history")
-    suspend fun getMissionHistory(): List<MissionHistoryItem>
 
-    // 참여 이력 상세 조회
-    @GET("api/missions/history/{participationId}")
-    suspend fun getMissionHistoryDetail(
-        @retrofit2.http.Path("participationId") participationId: Long
-    ): MissionHistoryDetail
 }
