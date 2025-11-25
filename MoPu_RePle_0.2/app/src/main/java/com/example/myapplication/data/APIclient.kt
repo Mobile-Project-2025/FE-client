@@ -25,4 +25,20 @@ object ApiClient {
         retrofit = r
         return r.create(Mission_API::class.java)
     }
+
+    private fun getClient(context: Context): Retrofit {
+        return retrofit ?: synchronized(this) {
+            val client = HttpClientProvider.get(context)
+            Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .also { retrofit = it }
+        }
+    }
+
+    fun getUserApi(context: Context): User_API {
+        return getClient(context).create(User_API::class.java)
+    }
 }

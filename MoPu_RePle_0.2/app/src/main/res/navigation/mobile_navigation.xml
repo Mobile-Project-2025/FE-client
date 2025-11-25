@@ -53,13 +53,43 @@
         <action
             android:id="@+id/move_home_to_camera"
             app:destination="@+id/navigation_mission_camera" />
+
+        <action
+            android:id="@+id/action_home_to_history_detail"
+            app:destination="@id/navigation_history_detail" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_point"
         android:name="com.example.myapplication.ui.Point.PointFragment"
         android:label="@string/title_point"
-        tools:layout="@layout/fragment_point" />
+        tools:layout="@layout/fragment_point">
+
+        <!-- [추가됨] 상세 화면으로 이동하는 화살표 -->
+        <action
+            android:id="@+id/action_pointFragment_to_rewardDetailFragment"
+            app:destination="@id/navigation_reward_detail" />
+    </fragment>
+
+    <!-- [추가됨] 상품 상세 화면 (데이터 받기 설정) -->
+    <fragment
+        android:id="@+id/navigation_reward_detail"
+        android:name="com.example.myapplication.ui.Point.RewardDetailFragment"
+        android:label="상품 상세"
+        tools:layout="@layout/layout_mission_item_detail">
+        <argument
+            android:name="brand"
+            app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="price"
+            app:argType="integer" />
+        <argument
+            android:name="imageRes"
+            app:argType="integer" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_my_page"
@@ -69,13 +99,11 @@
 
 
     <!-- 미션 관련 화면 == 카메라 인증 -->
-        <fragment
-            android:id="@+id/navigation_mission_camera"
-            android:name="com.example.myapplication.ui.Mission_Camera.Mission_CameraFragment"
-            android:label="@string/title_mission_camera"
-            tools:layout="@layout/fragment_mission_camera" />
-
-
+    <fragment
+        android:id="@+id/navigation_mission_camera"
+        android:name="com.example.myapplication.ui.Mission_Camera.Mission_CameraFragment"
+        android:label="@string/title_mission_camera"
+        tools:layout="@layout/fragment_mission_camera" />
 
     <!-- 관리자 화면 -->
     <fragment
@@ -95,5 +123,32 @@
         android:name="com.example.myapplication.ui.Admin_MissionList.AdminMissionListFragment"
         android:label="@string/title_admin_mission_list"
         tools:layout="@layout/fragment_admin_mission_list" />
+
+    <fragment
+        android:id="@+id/navigation_gallery"
+        android:name="com.example.myapplication.ui.Home.GalleryFragment"
+        android:label="GalleryFragment"
+        tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/navigation_history_list"
+        android:name="com.example.myapplication.ui.MissionHistory.MissionHistoryFragment"
+        android:label="참여 챌린지 이력"
+        tools:layout="@layout/fragment_mission_history_list">
+
+        <action
+            android:id="@+id/action_historyList_to_detail"
+            app:destination="@id/navigation_history_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_history_detail"
+        android:name="com.example.myapplication.ui.MissionHistory.MissionHistoryDetailFragment"
+        android:label="이력 상세"
+        tools:layout="@layout/fragment_mission_history_detail">
+        <argument
+            android:name="participationId"
+            app:argType="long" />
+    </fragment>
 
 </navigation>
