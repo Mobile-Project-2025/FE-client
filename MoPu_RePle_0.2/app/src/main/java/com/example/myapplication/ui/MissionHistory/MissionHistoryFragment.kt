@@ -2,6 +2,7 @@ package com.example.myapplication.ui.MissionHistory
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -19,6 +20,10 @@ class MissionHistoryFragment : Fragment(R.layout.fragment_mission_history_list) 
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentMissionHistoryListBinding.bind(view)
 
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         adapter = MissionHistoryAdapter { participationId ->
             // 상세 화면으로 이동 (nav_graph에 action 추가 필요)
             val action = MissionHistoryFragmentDirections.actionHistoryListToDetail(participationId)
@@ -29,6 +34,10 @@ class MissionHistoryFragment : Fragment(R.layout.fragment_mission_history_list) 
         fetchHistory()
     }
 
+    override fun onResume() {
+        super.onResume()
+        (activity as? AppCompatActivity)?.supportActionBar?.hide()
+    }
     private fun fetchHistory() {
         lifecycleScope.launch {
             try {
