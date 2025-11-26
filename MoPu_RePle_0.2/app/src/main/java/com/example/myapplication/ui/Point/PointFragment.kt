@@ -89,6 +89,12 @@ class PointFragment : Fragment() {
         adapter.submit(list)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 앱바(보라색 타이틀바)를 강제로 숨깁니다.
+        (activity as? androidx.appcompat.app.AppCompatActivity)?.supportActionBar?.hide()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
