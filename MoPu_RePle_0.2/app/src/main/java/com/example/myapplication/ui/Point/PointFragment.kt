@@ -6,16 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentPointBinding
+import com.example.myapplication.ui.UserViewModel
 
 class PointFragment : Fragment() {
 
     private var _binding: FragmentPointBinding? = null
     private val binding get() = _binding!!
-
+    private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var adapter: RewardAdapter
 
     private val categories = listOf("전체", "편의점", "뷰티", "카페", "치킨/피자")
@@ -37,18 +40,36 @@ class PointFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.tvNickname.text = "홍길동님"
-        binding.tvPoints.text = "10800P"
+        // 1. 서버에서 정보 가져오기 요청
+        userViewModel.fetchUserInfo()
+
+        // 2. 닉네임 관찰 및 업데이트 (기존 하드코딩 제거)
+        userViewModel.userNickname.observe(viewLifecycleOwner) { nickname ->
+            binding.tvNickname.text = "${nickname}님"
+        }
+
+        // 3. 포인트 관찰 및 업데이트
+        userViewModel.userPoints.observe(viewLifecycleOwner) { points ->
+            binding.tvPoints.text = "${points}P"
+        }
 
         binding.chipGroup.removeAllViews()
         categories.forEachIndexed { index, name ->
             val chip = layoutInflater.inflate(R.layout.view_chip_filter, binding.chipGroup, false) as Chip
             chip.text = name
-            chip.isChecked = index == 2
+            chip.isChecked = index == 0
             binding.chipGroup.addView(chip)
         }
 
-        adapter = RewardAdapter()
+        adapter = RewardAdapter { item ->
+            val action = PointFragmentDirections.actionPointFragmentToRewardDetailFragment(
+                brand = item.brand,
+                title = item.title,
+                price = item.price,
+                imageRes = item.imageRes
+            )
+            findNavController().navigate(action)
+        }
         binding.recyclerRewards.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerRewards.adapter = adapter
 
@@ -66,6 +87,12 @@ class PointFragment : Fragment() {
     private fun applyFilter(category: String) {
         val list = if (category == "전체") allItems else allItems.filter { it.category == category }
         adapter.submit(list)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 앱바(보라색 타이틀바)를 강제로 숨깁니다.
+        (activity as? androidx.appcompat.app.AppCompatActivity)?.supportActionBar?.hide()
     }
 
     override fun onDestroyView() {

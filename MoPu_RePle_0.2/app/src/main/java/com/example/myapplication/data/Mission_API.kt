@@ -15,7 +15,7 @@ interface Mission_API {
     // STUDENT
     // 승인 대기 미션 조회
     @GET("api/missions/pending")
-    suspend fun getPendingMissions_STUDENT(): List<Mission_Data>
+    suspend fun getPendingMissions(): List<PendingMission>
 
     // 상시미션 조회
     @GET("api/missions/regular")
@@ -52,4 +52,13 @@ interface Mission_API {
     // 종료된 미션 목록
     @GET("api/admin/missions/termination")
     suspend fun getTerminationMissions(): List<Mission_Data>
+
+    @GET("api/missions/history")
+    suspend fun getMissionHistory(): List<MissionHistoryItem>
+
+    // 참여 이력 상세 조회
+    @GET("api/missions/history/{participationId}")
+    suspend fun getMissionHistoryDetail(
+        @retrofit2.http.Path("participationId") participationId: Long
+    ): MissionHistoryDetail
 }

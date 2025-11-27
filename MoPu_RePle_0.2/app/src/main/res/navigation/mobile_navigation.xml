@@ -53,6 +53,9 @@
             android:id="@+id/move_home_to_gallery"
             app:destination="@+id/navigation_gallery" />
 
+        <action
+            android:id="@+id/action_home_to_history_detail"
+            app:destination="@id/navigation_history_detail" />
     </fragment>
 
     <!-- 포인트 -->
@@ -60,7 +63,32 @@
         android:id="@+id/navigation_point"
         android:name="com.example.myapplication.ui.Point.PointFragment"
         android:label="@string/title_point"
-        tools:layout="@layout/fragment_point" />
+        tools:layout="@layout/fragment_point">
+
+        <!-- [추가됨] 상세 화면으로 이동하는 화살표 -->
+        <action
+            android:id="@+id/action_pointFragment_to_rewardDetailFragment"
+            app:destination="@id/navigation_reward_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_reward_detail"
+        android:name="com.example.myapplication.ui.Point.RewardDetailFragment"
+        android:label="상품 상세"
+        tools:layout="@layout/layout_mission_item_detail">
+        <argument
+            android:name="brand"
+            app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="price"
+            app:argType="integer" />
+        <argument
+            android:name="imageRes"
+            app:argType="integer" />
+    </fragment>
 
     <!-- 마이페이지 -->
     <fragment
@@ -131,5 +159,29 @@
         android:name="com.example.myapplication.ui.Home.GalleryFragment_2"
         android:label="GalleryFragment"
         tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/navigation_history_detail"
+        android:name="com.example.myapplication.ui.MissionHistory.MissionHistoryDetailFragment"
+        android:label="fragment_mission_history_detail"
+        tools:layout="@layout/fragment_mission_history_detail">
+
+        <argument
+            android:name="participationId"
+            app:argType="long"
+            android:defaultValue="0L" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_history_list"
+        android:name="com.example.myapplication.ui.MissionHistory.MissionHistoryFragment"
+        android:label="참여 챌린지 이력"
+        tools:layout="@layout/fragment_mission_history_list">
+
+        <action
+            android:id="@+id/action_historyList_to_detail"
+            app:destination="@id/navigation_history_detail" />
+    </fragment>
 
 </navigation>
