@@ -148,7 +148,7 @@
                 android:id="@+id/mission_camera_how_much_point"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="미션비     300p"
+                android:text="point     300p"
                 android:textSize="15sp"/>
         </LinearLayout>
         <View
@@ -198,7 +198,7 @@
         android:textSize="20sp"
 
         android:padding="6dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="15dp"
         app:layout_constraintTop_toBottomOf="@+id/mission_camera_Preview_before_Submit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -212,9 +212,8 @@
         android:layout_height="180dp"
         android:scaleType="centerCrop"
         android:background="#DDDDDD"
-        android:layout_marginTop="270dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="15dp"
+        app:layout_constraintTop_toBottomOf="@+id/mission_camera_linear_challenge_info"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

@@ -21,13 +21,16 @@ import com.example.myapplication.data.Mission_Data
 import com.example.myapplication.databinding.FragmentHomeBinding
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import android.text.Editable
+import android.text.TextWatcher
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    // 🔍 검색을 위해 마지막으로 로드된 미션들을 저장해둘 리스트
+    private var allLoadedMissions: List<Mission_Data> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,12 +42,16 @@ class HomeFragment : Fragment() {
 
         // 이미지 좌우 슬라이드 영역
         val pager = root.findViewById<ViewPager2>(R.id.home_img_slide_1)
+
+        // 홈 배너 이미지 목록 (갤러리 전체보기와 동일한 리스트)
         val sliderImages = listOf(
             R.drawable.horse_picture,
-            R.drawable.horse_picture,
-            R.drawable.horse_picture
+            R.drawable.main_banner1,
+            R.drawable.main_banner2
         )
-        pager.adapter = ImagePagerAdapter(sliderImages)
+        pager.adapter = ImagePagerAdapter(sliderImages) {
+            findNavController().navigate(R.id.move_home_to_gallery)
+        }
 
 
 // 구버전
@@ -142,23 +149,120 @@ class HomeFragment : Fragment() {
                 // icon
                 Glide.with(missionView)
                     .load(mission.iconImageUrl)
-                    .placeholder(R.drawable.ic_mission) // 로딩 중/에러 시 기본 아이콘
+                    .placeholder(R.drawable.ic_mission)
                     .error(R.drawable.ic_mission)
                     .into(icon)
 
+
                 // ==============================================================================
-                // 클릭 == 미션 이벤트 박스
+                // 미션박스에 클릭 이벤트 추가 == 미션 이벤트 박스
                 missionView.setOnClickListener {
-                    val bundle = Bundle().apply {
-                        putInt("missionId", mission.missionId.toInt())
-                        putString("title", mission.title)
-                        putInt("missionPoint", mission.missionPoint)
-                        putString("createdAt", mission.createdAt)
-                        putString("iconImageUrl", mission.iconImageUrl)
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        try {
+                            val api = ApiClient.getMissionsApi(requireContext())
+                            val detail = api.getMissionDetail(mission.missionId.toInt())
+                            Log.d("MissionAPI", "getMissionDetail 성공, missionId=${detail.missionId}")
+
+                            val bundle = Bundle().apply {
+                                putInt("missionId", detail.missionId)
+                                putString("title", detail.title)
+                                putString("content", detail.content)
+                                putInt("missionPoint", detail.missionPoint)
+                                putString("iconImageUrl", detail.iconImageUrl)
+                                putString("startDate", detail.startDate)
+                                putString("deadLine", detail.deadLine)
+                                // null이면 0으로
+                                putInt("participationCount", detail.participationCount ?: 0)
+                                putBoolean("hasSubmitted", detail.hasSubmitted)
+                            }
+                            findNavController().navigate(R.id.move_home_to_camera, bundle)
+                        } catch (e: HttpException) {
+                            Log.e(
+                                "MissionAPI",
+                                "getMissionDetail 실패, HTTP code = ${e.code()}, message = ${e.message()}",
+                                e
+                            )
+                            Toast.makeText(
+                                requireContext(),
+                                "미션 상세 조회 실패: ${e.code()}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } catch (e: Throwable) {
+                            Log.e(
+                                "MissionAPI",
+                                "getMissionDetail 호출 중 기타 오류: ${e.localizedMessage}",
+                                e
+                            )
+                            Toast.makeText(
+                                requireContext(),
+                                "에러: ${e.localizedMessage}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                    findNavController().navigate(R.id.move_home_to_camera, bundle)
                 }
                 missionContainer.addView(missionView)
+            }
+        }
+
+
+        // 검색 로직
+        fun filterMissions(query: String) {
+            val filtered = if (query.isBlank()) {
+                allLoadedMissions    // 검색어 없으면 전체
+            } else {
+                allLoadedMissions.filter { mission ->
+                    mission.title.contains(query, ignoreCase = true)
+                }
+            }
+            renderMissions(filtered)
+        }
+
+        // 검색 EditText에 TextWatcher 연결
+        binding.homeSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) { }
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) { }
+
+            override fun afterTextChanged(s: Editable?) {
+                val query = s?.toString().orEmpty()
+                filterMissions(query)
+            }
+        })
+
+
+        // ========================================================================================
+        // 1. "승인 대기 미션" 버튼 클릭 시
+        binding.homeButtonTypeMission1.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val api = ApiClient.getMissionsApi(requireContext())
+                    val missions = api.getPendingMissions_STUDENT()
+                    Log.d("MissionAPI", "getUserPendingMissions 성공, missions size = ${missions.size}")
+
+                    val gson = GsonBuilder().setPrettyPrinting().create()
+                    val missionsJson = gson.toJson(missions)
+                    Log.d("MissionAPI_FULL_RESPONSE", missionsJson)
+
+                    allLoadedMissions = missions
+                    renderMissions(missions)    // 미션박스 생성 함수
+                } catch (e: HttpException) {
+                    Log.e("MissionAPI", "getUserPendingMissions 실패, HTTP code = ${e.code()}, message = ${e.message()}", e)
+                    Toast.makeText(requireContext(), "승인 대기 미션 목록 로딩 실패: ${e.code()}", Toast.LENGTH_SHORT).show()
+                } catch (e: Throwable) {
+                    Log.e("MissionAPI", "getUserPendingMissions 호출 중 기타 오류: ${e.localizedMessage}", e)
+                    Toast.makeText(requireContext(), "에러: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -175,6 +279,7 @@ class HomeFragment : Fragment() {
                     val missionsJson = gson.toJson(missions)
                     Log.d("MissionAPI_FULL_RESPONSE", missionsJson)
 
+                    allLoadedMissions = missions
                     renderMissions(missions)    // 미션박스 생성 함수
                 } catch (e: HttpException) {
                     Log.e("MissionAPI", "getRegularMissions 실패, HTTP code = ${e.code()}, message = ${e.message()}", e)
@@ -199,6 +304,7 @@ class HomeFragment : Fragment() {
                     val missionsJson = gson.toJson(missions)
                     Log.d("MissionAPI_FULL_RESPONSE", missionsJson)
 
+                    allLoadedMissions = missions
                     renderMissions(missions)    // 미션박스 생성 함수
                 } catch (e: HttpException) {
                     Log.e("MissionAPI", "getEventMissions 실패, HTTP code = ${e.code()}, message = ${e.message()}", e)
@@ -212,15 +318,32 @@ class HomeFragment : Fragment() {
         return root
     }
 
+    // 뒤로가기 눌러도, 상단 액션바 안 뜨게 방지
+    override fun onResume() {
+        super.onResume()
+        (activity as? androidx.appcompat.app.AppCompatActivity)?.supportActionBar?.hide()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
+
+    // 상단 이미지 스와이프
     private class ImagePagerAdapter(
-        private val images: List<Int>
+        private val images: List<Int>,
+        private val onImageClick: () -> Unit   // 클릭 시
     ) : RecyclerView.Adapter<ImagePagerAdapter.VH>() {
-        inner class VH(val iv: ImageView) : RecyclerView.ViewHolder(iv)
+
+        inner class VH(val iv: ImageView) : RecyclerView.ViewHolder(iv) {
+            init {
+                iv.setOnClickListener {
+                    onImageClick()
+                }
+            }
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val imageView = ImageView(parent.context).apply {
                 layoutParams = LayoutParams(
@@ -231,9 +354,11 @@ class HomeFragment : Fragment() {
             }
             return VH(imageView)
         }
+
         override fun onBindViewHolder(holder: VH, position: Int) {
             holder.iv.setImageResource(images[position])
         }
+
         override fun getItemCount(): Int = images.size
     }
 }

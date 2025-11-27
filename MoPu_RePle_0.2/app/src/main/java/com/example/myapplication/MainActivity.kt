@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
             when (destination.id) {
 
                 // 액션바, 네비바 둘 다 안 보임 == login, signup, admin_main, admin_mission_list
-                R.id.navigation_login, R.id.navigation_signup, R.id.navigation_admin_main, R.id.navigation_admin_mission_list -> {
+                R.id.navigation_login, R.id.navigation_signup, R.id.navigation_admin_main, R.id.navigation_admin_mission_list, R.id.navigation_gallery -> {
                     supportActionBar?.hide()
                     binding.navView.visibility = View.GONE
                 }

@@ -1,17 +1,23 @@
-package com.example.myapplication.ui.Admin_MissionList
+package com.example.myapplication.ui.Admin_MissionList // <- 네 실제 패키지명에 맞게 수정
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.myapplication.R
+import com.example.myapplication.data.ApiClient
+import com.example.myapplication.data.Mission_Data
 import com.example.myapplication.databinding.FragmentAdminMissionListBinding
+import com.google.gson.GsonBuilder
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class AdminMissionListFragment : Fragment() {
 
@@ -24,92 +30,177 @@ class AdminMissionListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAdminMissionListBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        val root = binding.root
 
-        // 미션 관련 부분
+        // 미션 박스 컨테이너
         val missionContainer = binding.adminMissionListContainer
-        // 미션 데이터 2차원 배열
-        val mission_content = arrayOf(
-            //
-            // 6개 정보 배열
-            // ID | 고정 미션 여부 | 승인 대기 여부 | 이름 | 포인트 | 인원
-            //
-            // 승인대기 여부의 경우
-            // 0 == 생성은 되었으나, 참여는 아직 안함
-            // 1 == 참여는 했고, 승인 대기 중
-            // 2 == 기간이 지나서 마감됨
-            // 3 == 관리자가 종료 처리함
-            arrayOf("1", "1", "0", "페트병 버리기", "300", "10"),
-            arrayOf("2", "1", "0", "분리수거", "200", "5"),
-            arrayOf("3", "0", "1", "이거 승인 대기 중임", "67", "15"),
-            arrayOf("4", "0", "2", "이거 기간 지나서 마감", "49", "25"),
-            arrayOf("5", "0", "3", "이거 종료 처리한 거임", "999", "2")
-        )
 
-        // 미션 필터링 함수
-        fun renderMissions(predicate: (Array<String>) -> Boolean) {
+        // HomeFragment와 동일한 방식으로 미션 박스 그리는 함수
+        fun renderMissions(missions: List<Mission_Data>) {
             missionContainer.removeAllViews()
 
-            val missionCount = mission_content.size
-            for (i in 0 until missionCount) {
-                val mission = mission_content[i]
+            missions.forEach { mission ->
+                val missionView = inflater.inflate(
+                    R.layout.layout_mission_box_mode,
+                    missionContainer,
+                    false
+                )
 
-                if (predicate(mission)) {
-                    val missionView = inflater.inflate(
-                        R.layout.layout_mission_box_mode,
-                        missionContainer,
-                        false
+                val title =
+                    missionView.findViewById<TextView>(R.id.home_mission_text_mode)
+                val point =
+                    missionView.findViewById<TextView>(R.id.home_mission_text_point_mode)
+                val people =
+                    missionView.findViewById<TextView>(R.id.home_mission_text_people_mode)
+                val icon =
+                    missionView.findViewById<ImageView>(R.id.home_mission_icon_mode)
+
+                // title, point
+                title.text = mission.title
+                point.text = "${mission.missionPoint}P"
+
+                // people (참여 인원; 없으면 0으로 처리)
+                val peopleCount = mission.participationCount ?: 0
+                people.text = "${peopleCount}명"
+
+                // icon
+                Glide.with(missionView)
+                    .load(mission.iconImageUrl)
+                    .placeholder(R.drawable.ic_mission)
+                    .error(R.drawable.ic_mission)
+                    .into(icon)
+
+                // (관리자 페이지에서 클릭 동작은 추후 구현)
+                missionContainer.addView(missionView)
+            }
+        }
+
+        // ================================
+        // 버튼 클릭 시 관리자용 미션 목록 불러오기
+        // ================================
+
+        // 1. "승인 대기 미션" 버튼 → /api/admin/missions/pending
+        binding.adminMissionButtonTypeMission1.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val api = ApiClient.getMissionsApi(requireContext())
+                    val missions = api.getPendingMissions_ADMIN()
+                    Log.d("AdminMissionAPI", "getPendingMissions 성공, missions size = ${missions.size}")
+
+                    val gson = GsonBuilder().setPrettyPrinting().create()
+                    val missionsJson = gson.toJson(missions)
+                    Log.d("AdminMissionAPI_FULL_RESPONSE", missionsJson)
+
+                    renderMissions(missions)
+                } catch (e: HttpException) {
+                    Log.e(
+                        "AdminMissionAPI",
+                        "getPendingMissions 실패, HTTP code = ${e.code()}, message = ${e.message()}",
+                        e
                     )
-
-                    val title = missionView.findViewById<TextView>(R.id.home_mission_text_mode)
-                    val point = missionView.findViewById<TextView>(R.id.home_mission_text_point_mode)
-                    val people = missionView.findViewById<TextView>(R.id.home_mission_text_people_mode)
-
-                    title.text = mission[3]             // 미션명
-                    point.text = mission[4] + "P"       // 포인트
-                    people.text = mission[5] + "명"      // 몇 명
-
-                    missionContainer.addView(missionView)
+                    Toast.makeText(
+                        requireContext(),
+                        "승인 대기 미션 로딩 실패: ${e.code()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (e: Throwable) {
+                    Log.e(
+                        "AdminMissionAPI",
+                        "getPendingMissions 호출 중 기타 오류: ${e.localizedMessage}",
+                        e
+                    )
+                    Toast.makeText(
+                        requireContext(),
+                        "에러: ${e.localizedMessage}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
 
-        // 함수 이용
-        renderMissions { mission -> mission[2] == "1" }
-        binding.adminMissionButtonTypeMission1.setOnClickListener {
-            renderMissions { mission -> mission[2] == "1" }
-        }
+        // 2. "마감된 미션" 버튼 → /api/admin/missions/deadLine
         binding.adminMissionButtonTypeMission2.setOnClickListener {
-            renderMissions { mission -> mission[2] == "2" }
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val api = ApiClient.getMissionsApi(requireContext())
+                    val missions = api.getDeadLineMissions()
+                    Log.d("AdminMissionAPI", "getDeadLineMissions 성공, missions size = ${missions.size}")
+
+                    val gson = GsonBuilder().setPrettyPrinting().create()
+                    val missionsJson = gson.toJson(missions)
+                    Log.d("AdminMissionAPI_FULL_RESPONSE", missionsJson)
+
+                    renderMissions(missions)
+                } catch (e: HttpException) {
+                    Log.e(
+                        "AdminMissionAPI",
+                        "getDeadLineMissions 실패, HTTP code = ${e.code()}, message = ${e.message()}",
+                        e
+                    )
+                    Toast.makeText(
+                        requireContext(),
+                        "마감된 미션 로딩 실패: ${e.code()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (e: Throwable) {
+                    Log.e(
+                        "AdminMissionAPI",
+                        "getDeadLineMissions 호출 중 기타 오류: ${e.localizedMessage}",
+                        e
+                    )
+                    Toast.makeText(
+                        requireContext(),
+                        "에러: ${e.localizedMessage}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
+
+        // 3. "종료 미션" 버튼 → /api/admin/missions/termination
         binding.adminMissionButtonTypeMission3.setOnClickListener {
-            renderMissions { mission -> mission[2] == "3" }
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val api = ApiClient.getMissionsApi(requireContext())
+                    val missions = api.getTerminationMissions()
+                    Log.d("AdminMissionAPI", "getTerminationMissions 성공, missions size = ${missions.size}")
+
+                    val gson = GsonBuilder().setPrettyPrinting().create()
+                    val missionsJson = gson.toJson(missions)
+                    Log.d("AdminMissionAPI_FULL_RESPONSE", missionsJson)
+
+                    renderMissions(missions)
+                } catch (e: HttpException) {
+                    Log.e(
+                        "AdminMissionAPI",
+                        "getTerminationMissions 실패, HTTP code = ${e.code()}, message = ${e.message()}",
+                        e
+                    )
+                    Toast.makeText(
+                        requireContext(),
+                        "종료 미션 로딩 실패: ${e.code()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (e: Throwable) {
+                    Log.e(
+                        "AdminMissionAPI",
+                        "getTerminationMissions 호출 중 기타 오류: ${e.localizedMessage}",
+                        e
+                    )
+                    Toast.makeText(
+                        requireContext(),
+                        "에러: ${e.localizedMessage}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
+
         return root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private class ImagePagerAdapter(
-        private val images: List<Int>
-    ) : RecyclerView.Adapter<ImagePagerAdapter.VH>() {
-        inner class VH(val iv: ImageView) : RecyclerView.ViewHolder(iv)
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val imageView = ImageView(parent.context).apply {
-                layoutParams = LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT
-                )
-                scaleType = ImageView.ScaleType.FIT_CENTER
-            }
-            return VH(imageView)
-        }
-        override fun onBindViewHolder(holder: VH, position: Int) {
-            holder.iv.setImageResource(images[position])
-        }
-        override fun getItemCount(): Int = images.size
     }
 }

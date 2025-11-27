@@ -53,6 +53,12 @@
         <action
             android:id="@+id/move_home_to_camera"
             app:destination="@+id/navigation_mission_camera" />
+
+        <!-- 홈 화면 상단에 카드 클릭 시, gallery로 이동 -->
+        <action
+            android:id="@+id/move_home_to_gallery"
+            app:destination="@+id/navigation_gallery" />
+
     </fragment>
 
     <fragment
@@ -95,5 +101,13 @@
         android:name="com.example.myapplication.ui.Admin_MissionList.AdminMissionListFragment"
         android:label="@string/title_admin_mission_list"
         tools:layout="@layout/fragment_admin_mission_list" />
+
+
+    <!-- NEW_갤러리 -->
+    <fragment
+        android:id="@+id/navigation_gallery"
+        android:name="com.example.myapplication.ui.Home.GalleryFragment_2"
+        android:label="GalleryFragment"
+        tools:layout="@layout/fragment_gallery" />
 
 </navigation>
