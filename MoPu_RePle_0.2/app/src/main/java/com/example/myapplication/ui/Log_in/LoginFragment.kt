@@ -150,6 +150,11 @@ class LoginFragment : Fragment() {
                             val nickname = obj.optString("nickname")
                             val role = obj.optString("role")
 
+                            // 로그캣 확인용
+                            Log.d("LOGIN_RESPONSE", "accessToken = $token")
+                            Log.d("LOGIN_RESPONSE", "nickname = $nickname")
+                            Log.d("LOGIN_RESPONSE", "role = $role")
+
                             // 로그인 성공 (코드: 200) == return값 3개 저장
                             TokenStore.saveAll(requireContext(), token, nickname, role)
                             Toast.makeText(
@@ -157,7 +162,26 @@ class LoginFragment : Fragment() {
                                 "로그인 성공: $nickname",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            findNavController().navigate(R.id.move_login_to_home)
+
+
+                            // ========================================================================
+                            // return { role = ADMIN } == 관리자 페이지로 이동
+                            // return { role = STUDENT } == Home 화면으로 이동
+                            when (role) {
+                                "ADMIN" -> {
+                                    findNavController().navigate(R.id.move_login_to_admin_main)
+                                }
+                                "STUDENT" -> {
+                                    findNavController().navigate(R.id.move_login_to_home)
+                                }
+                                else -> {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "로그인 role 부분에서 문제 발생",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                         } catch (t: Throwable) {
                             AlertDialog.Builder(requireContext()).run {
                                 setTitle("응답 파싱 실패")
@@ -186,7 +210,7 @@ object TokenStore {
     private const val KEY_NICKNAME = "nickname"
     private const val KEY_ROLE = "role"
 
-    // 세 값 한 번에 저장
+    // 3개 값 저장
     fun saveAll(context: Context, token: String?, nickname: String?, role: String?) {
         if (token.isNullOrBlank()) return
         val sp = context.getSharedPreferences(SP, Context.MODE_PRIVATE)
@@ -234,7 +258,7 @@ class AuthInterceptor(private val context: Context) : Interceptor {
             .header("Accept", "application/json")
 
         if (shouldAttach) {
-            val token = TokenStore.getToken(context)   // 👈 변경
+            val token = TokenStore.getToken(context)
             if (!token.isNullOrBlank()) {
                 reqBuilder.header("Authorization", "Bearer $token")
             }
