@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.R.attr.visibility
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -26,16 +27,15 @@ class MainActivity : AppCompatActivity() {
         // 목적지에 따라 액션바 / 바텀 네비바 보이기/숨기기
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                // 액션바, 네비바 둘 다 안 보이게
+
+                // 액션바, 네비바 둘 다 안 보이게 (로그인/회원가입/관리자 화면/갤러리)
                 R.id.navigation_login,
                 R.id.navigation_signup,
                 R.id.navigation_admin_main,
                 R.id.navigation_admin_mission_list,
                 R.id.navigation_admin_mission_create,
-                R.id.navigation_admin_pending_mission_detail -> {   // ★ 여기 추가
-                    supportActionBar?.hide()
-                    binding.navView.visibility = View.GONE
-                }
+                R.id.navigation_admin_pending_mission_detail,
+
 
                 // 액션바만 숨기고 네비바는 보이게
                 R.id.navigation_home,

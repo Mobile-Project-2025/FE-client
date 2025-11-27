@@ -1,16 +1,15 @@
 package com.example.myapplication.ui.Admin_MissionList
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams
 import android.widget.ImageView
-import android.widget.Toast
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentAdminMissionListBinding
@@ -30,6 +29,14 @@ class AdminMissionListFragment : Fragment() {
     // 현재 선택된 필터
     private var currentFilter: MissionApiType = MissionApiType.PENDING
 
+    // 어떤 목록을 보는지 구분용
+    private enum class MissionApiType {
+        PENDING,      // 승인 대기
+        DEADLINE,     // 마감된
+        TERMINATION,  // 종료
+        ALL           // 전체
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,22 +45,29 @@ class AdminMissionListFragment : Fragment() {
         _binding = FragmentAdminMissionListBinding.inflate(inflater, container, false)
         val root = binding.root
 
-        // 최초 진입 시: 승인 대기 미션
+        // 최초 진입 시: 승인 대기 미션 목록 보여주기
         currentFilter = MissionApiType.PENDING
         loadMissions(currentFilter)
 
-        binding.adminMissionButtonTypeMissionAll.setOnClickListener {
+        // 전체 버튼 (xml에 존재할 경우에만 동작)
+        binding.adminMissionButtonTypeMissionAll?.setOnClickListener {
             currentFilter = MissionApiType.ALL
             loadMissions(currentFilter)
         }
+
+        // 승인 대기
         binding.adminMissionButtonTypeMission1.setOnClickListener {
             currentFilter = MissionApiType.PENDING
             loadMissions(currentFilter)
         }
+
+        // 마감된
         binding.adminMissionButtonTypeMission2.setOnClickListener {
             currentFilter = MissionApiType.DEADLINE
             loadMissions(currentFilter)
         }
+
+        // 종료
         binding.adminMissionButtonTypeMission3.setOnClickListener {
             currentFilter = MissionApiType.TERMINATION
             loadMissions(currentFilter)
@@ -62,21 +76,17 @@ class AdminMissionListFragment : Fragment() {
         return root
     }
 
-    private enum class MissionApiType {
-        PENDING,
-        DEADLINE,
-        TERMINATION,
-        ALL
-    }
-
+    // --------------------------
+    // 1) 서버에서 목록 가져오기
+    // --------------------------
     private fun loadMissions(type: MissionApiType) {
         val client = HttpClientProvider.get(requireContext())
 
         val path = when (type) {
-            MissionApiType.PENDING -> "/api/admin/missions/pending"
-            MissionApiType.DEADLINE -> "/api/admin/missions/deadLine"
+            MissionApiType.PENDING     -> "/api/admin/missions/pending"
+            MissionApiType.DEADLINE    -> "/api/admin/missions/deadLine"
             MissionApiType.TERMINATION -> "/api/admin/missions/termination"
-            MissionApiType.ALL -> "/api/admin/missions"
+            MissionApiType.ALL         -> "/api/admin/missions"
         }
 
         val request = Request.Builder()
@@ -111,6 +121,8 @@ class AdminMissionListFragment : Fragment() {
 
                 val missions = parseMissionList(body)
 
+                Log.d("AdminMissionAPI", "loadMissions($type) size=${missions.size}")
+
                 requireActivity().runOnUiThread {
                     renderMissions(type, missions)
                 }
@@ -118,6 +130,9 @@ class AdminMissionListFragment : Fragment() {
         })
     }
 
+    // --------------------------
+    // 2) JSON → 데이터 객체 변환
+    // --------------------------
     private fun parseMissionList(jsonString: String): List<AdminMissionDto> {
         val list = mutableListOf<AdminMissionDto>()
 
@@ -147,6 +162,9 @@ class AdminMissionListFragment : Fragment() {
         return list
     }
 
+    // --------------------------
+    // 3) 화면에 카드 렌더링
+    // --------------------------
     private fun renderMissions(
         type: MissionApiType,
         missions: List<AdminMissionDto>
@@ -163,7 +181,8 @@ class AdminMissionListFragment : Fragment() {
                 false
             )
 
-            val icon = missionView.findViewById<ImageView>(R.id.home_mission_image_mode)
+            // 현재 layout_mission_box_mode.xml 기준 id
+            val icon = missionView.findViewById<ImageView>(R.id.home_mission_icon_mode)
             val title = missionView.findViewById<TextView>(R.id.home_mission_text_mode)
             val point = missionView.findViewById<TextView>(R.id.home_mission_text_point_mode)
             val people = missionView.findViewById<TextView>(R.id.home_mission_text_people_mode)
@@ -176,14 +195,14 @@ class AdminMissionListFragment : Fragment() {
             if (url.isNotBlank()) {
                 Glide.with(missionView)
                     .load(url)
-                    .placeholder(R.drawable.default_profile)
-                    .error(R.drawable.default_profile)
+                    .placeholder(R.drawable.ic_mission)
+                    .error(R.drawable.ic_mission)
                     .into(icon)
             } else {
-                icon.setImageResource(R.drawable.default_profile)
+                icon.setImageResource(R.drawable.ic_mission)
             }
 
-            // 승인 대기 미션일 때만 상세 화면으로 이동
+            // 승인 대기 목록일 때만 상세 화면 이동
             if (type == MissionApiType.PENDING) {
                 missionView.setOnClickListener {
                     val bundle = Bundle().apply {
@@ -200,16 +219,13 @@ class AdminMissionListFragment : Fragment() {
                 }
             }
 
-
             missionContainer.addView(missionView)
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
+    // --------------------------
+    // 4) DTO 정의
+    // --------------------------
     data class AdminMissionDto(
         val missionId: Long,
         val title: String,
@@ -221,23 +237,8 @@ class AdminMissionListFragment : Fragment() {
         val createdAt: String
     )
 
-    private class ImagePagerAdapter(
-        private val images: List<Int>
-    ) : RecyclerView.Adapter<ImagePagerAdapter.VH>() {
-        inner class VH(val iv: ImageView) : RecyclerView.ViewHolder(iv)
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val imageView = ImageView(parent.context).apply {
-                layoutParams = LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT
-                )
-                scaleType = ImageView.ScaleType.FIT_CENTER
-            }
-            return VH(imageView)
-        }
-        override fun onBindViewHolder(holder: VH, position: Int) {
-            holder.iv.setImageResource(images[position])
-        }
-        override fun getItemCount(): Int = images.size
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

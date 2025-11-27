@@ -138,6 +138,11 @@ class LoginFragment : Fragment() {
                             val nickname = obj.optString("nickname")
                             val role = obj.optString("role")
 
+                            // 로그캣 확인용
+                            Log.d("LOGIN_RESPONSE", "accessToken = $token")
+                            Log.d("LOGIN_RESPONSE", "nickname = $nickname")
+                            Log.d("LOGIN_RESPONSE", "role = $role")
+
                             // 로그인 성공 (코드: 200) == return값 3개 저장
                             TokenStore.saveAll(requireContext(), token, nickname, role)
                             Toast.makeText(
@@ -146,11 +151,21 @@ class LoginFragment : Fragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                            // 여기만 수정한 부분: role 값에 따라 분기
-                            if (role.equals("ADMIN", ignoreCase = true)) {
-                                findNavController().navigate(R.id.move_login_to_admin_main)
-                            } else {
-                                findNavController().navigate(R.id.move_login_to_home)
+                            // role 값에 따라 분기 (대소문자 상관없이 처리)
+                            when (role.uppercase()) {
+                                "ADMIN" -> {
+                                    findNavController().navigate(R.id.move_login_to_admin_main)
+                                }
+                                "STUDENT" -> {
+                                    findNavController().navigate(R.id.move_login_to_home)
+                                }
+                                else -> {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "알 수 없는 권한: $role",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
 
                         } catch (t: Throwable) {
@@ -170,6 +185,7 @@ class LoginFragment : Fragment() {
                         }
                     }
                 }
+
             }
         })
     }

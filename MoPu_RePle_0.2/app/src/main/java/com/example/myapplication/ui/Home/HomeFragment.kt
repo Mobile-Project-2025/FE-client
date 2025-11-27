@@ -129,8 +129,7 @@ class HomeFragment : Fragment() {
                 val people =
                     missionView.findViewById<TextView>(R.id.home_mission_text_people_mode)
                 val icon =
-                    missionView.findViewById<ImageView>(R.id.home_mission_image_mode)
-
+                    missionView.findViewById<ImageView>(R.id.home_mission_icon_mode)
 
                 // title, point
                 title.text = mission.title
