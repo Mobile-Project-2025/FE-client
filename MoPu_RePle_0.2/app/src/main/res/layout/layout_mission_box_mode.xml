@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
@@ -11,8 +10,6 @@
     android:layout_marginBottom="10dp"
     android:background="@drawable/border_box_gray">
 
-
-    <!-- 아이콘 -->
     <ImageView
         android:id="@+id/home_mission_icon_mode"
         android:layout_width="60dp"
@@ -46,6 +43,15 @@
             android:padding="1dp"
             android:gravity="center_vertical">
 
+
+            <!-- 포인트 -->
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/ic_coin" />
+
+
             <!-- 포인트 -->
             <ImageView
                 android:layout_width="15dp"
@@ -67,6 +73,8 @@
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:src="@drawable/default_profile" />
+
+
             <TextView
                 android:id="@+id/home_mission_text_people_mode"
                 android:layout_width="wrap_content"
@@ -88,4 +96,7 @@
         android:layout_margin="10dp"
         android:text=">"
         android:textSize="30sp" />
+
 </LinearLayout>
+
+

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 선택된 상태: 글자 흰색 -->
+    <item
+        android:state_selected="true"
+        android:color="#FFFFFF" />
+
+    <!-- 기본 상태: 글자 검정 -->
+    <item
+        android:color="#000000" />
+
+</selector>
