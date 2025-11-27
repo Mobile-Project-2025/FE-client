@@ -2,6 +2,7 @@ package com.example.myapplication.ui.Sign_up
 
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.example.myapplication.databinding.FragmentSignupBinding
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
+import com.example.myapplication.ui.Log_in.HttpClientProvider
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -29,6 +31,10 @@ class SignupFragment : Fragment() {
     private var value_isCheck_Nickname = false
     private var value_isCheck_StudentID = false
 
+    // 확인 후, ㄱㅊ은가에 대한 여부
+    private var value_available_Nickname = false
+    private var value_available_StudentID = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,20 +44,14 @@ class SignupFragment : Fragment() {
         _binding = FragmentSignupBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // 여기 위에까지는 기본코드
-
-
-
         // "회원가입 화면" 텍스트
         binding.signupTop
-
 
         // "~ 입력" 텍스트
         binding.signupPlsNickname
         binding.signupPlsStudentID
         binding.signupPlsPassword1
         binding.signupPlsPassword2
-
 
         // 중복확인 경고문
         binding.signupPlsChangeNickname.visibility = View.GONE
@@ -61,38 +61,28 @@ class SignupFragment : Fragment() {
         binding.signupItsOkStudentID.visibility = View.GONE
 
 
+        // ================================================================
         // 닉네임 중복확인 버튼
         binding.signupCheckNickname.setOnClickListener {
-
-            // (임시) 닉네임 중복확인 로직
-            if (binding.signupPlsChangeNickname.isGone) {
-                binding.signupPlsChangeNickname.visibility = View.VISIBLE
-            } else {
-                binding.signupPlsChangeNickname.visibility = View.GONE
-            }
-
             value_isCheck_Nickname = true
-//            // (api 로직 적용) 닉네임 중복확인 로직
-//            if (api이름 == true) {
-//                binding.signupItsOkNickname.visibility = View.VISIBLE   // 사용 가능한 닉네임 입니다
-//                binding.signupPlsChangeNickname.visibility = View.GONE
-//            } else {
-//                binding.signupPlsChangeNickname.visibility = View.VISIBLE   // 닉네임 중복입니다!
-//                binding.signupItsOkNickname.visibility = View.GONE
-//            }
+            val nickname = binding.signupInputNickname.text.toString()
+            if (nickname.isBlank()) {
+                Toast.makeText(requireContext(), "닉네임을 입력해주세요", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            checkNickname(nickname)
         }
+
 
         // 학번 중복확인 버튼
         binding.signupCheckStudentID.setOnClickListener {
-
-            // 학번 중복확인 로직
-            if (binding.signupPlsChangeStudentID.isGone) {
-                binding.signupPlsChangeStudentID.visibility = View.VISIBLE
-            } else {
-                binding.signupPlsChangeStudentID.visibility = View.GONE
-            }
-
             value_isCheck_StudentID = true
+            val studentId = binding.signupInputStudentID.text.toString()
+            if (studentId.isBlank()) {
+                Toast.makeText(requireContext(), "학번을 입력해주세요", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            checkStudentId(studentId)
         }
 
 
@@ -174,6 +164,26 @@ class SignupFragment : Fragment() {
                     }
                     break
                 }
+                if (value_available_Nickname == false) {
+                    AlertDialog.Builder(requireContext()).run {
+                        setTitle("닉네임이 중복입니다")
+                        setIcon(android.R.drawable.ic_dialog_alert)
+                        setMessage("닉네임을 다시 확인해주세요")
+                        setPositiveButton("OK", null)
+                        show()
+                    }
+                    break
+                }
+                if (value_available_StudentID == false) {
+                    AlertDialog.Builder(requireContext()).run {
+                        setTitle("학번이 중복입니다")
+                        setIcon(android.R.drawable.ic_dialog_alert)
+                        setMessage("학번을 다시 확인해주세요")
+                        setPositiveButton("OK", null)
+                        show()
+                    }
+                    break
+                }
 
 
                 // 3단계 == 비밀번호 입력, 확인 틀리지는 않았지?
@@ -198,10 +208,10 @@ class SignupFragment : Fragment() {
                     setPositiveButton("OK", null)
                     show()
                 }
+                // 회원가입 성공 시 == 로그인 페이지로 이동
+                findNavController().navigate(R.id.move_signup_to_login)
                 break
             }
-            // 회원가입 성공 시 == 로그인 페이지로 이동
-            findNavController().navigate(R.id.move_signup_to_login)
         }
         return root
     }
@@ -265,5 +275,116 @@ class SignupFragment : Fragment() {
     }
 
 
+    // 닉네임 중복확인 함수
+    private fun checkNickname(nickname: String) {
 
+        val url = "http://43.202.225.195:8080/api/auth/check-nickname?nickname=$nickname"
+
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
+
+        HttpClientProvider.get(requireContext()).newCall(request)
+            .enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    activity?.runOnUiThread {
+                        Toast.makeText(requireContext(), "서버 연결 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val bodyStr = response.body?.string()
+                        Log.d("닉네임 중복확인", "code=${response.code}, body=$bodyStr")
+
+                    activity?.runOnUiThread {
+
+                        when (response.code) {
+
+                            200 -> {
+                                val json = JSONObject(bodyStr)
+                                val available = json.optBoolean("available", false)
+
+                                if (available) {
+                                    binding.signupItsOkNickname.visibility = View.VISIBLE
+                                    binding.signupPlsChangeNickname.visibility = View.GONE
+                                    value_available_Nickname = true
+                                } else {
+                                    binding.signupItsOkNickname.visibility = View.GONE
+                                    binding.signupPlsChangeNickname.visibility = View.VISIBLE
+                                    value_available_Nickname = false
+                                }
+                            }
+
+                            409 -> {
+                                binding.signupItsOkNickname.visibility = View.GONE
+                                binding.signupPlsChangeNickname.visibility = View.VISIBLE
+                                value_available_Nickname = false
+                            }
+
+                            else -> {
+                                Toast.makeText(requireContext(), "오류 발생: ${response.code}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            })
+    }
+
+
+    // 학번 중복확인 함수
+    private fun checkStudentId(studentId: String) {
+
+        val url = "http://43.202.225.195:8080/api/auth/check-student-id?studentId=$studentId"
+
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .build()
+
+        HttpClientProvider.get(requireContext()).newCall(request)
+            .enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    activity?.runOnUiThread {
+                        Toast.makeText(requireContext(), "서버 연결 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val bodyStr = response.body?.string()
+                    Log.d("학번 중복확인", "code=${response.code}, body=$bodyStr")
+
+                    activity?.runOnUiThread {
+
+                        when (response.code) {
+
+                            200 -> {
+                                val json = JSONObject(bodyStr)
+                                val available = json.optBoolean("available", false)
+
+                                if (available) {
+                                    binding.signupItsOkStudentID.visibility = View.VISIBLE
+                                    binding.signupPlsChangeStudentID.visibility = View.GONE
+                                    value_available_StudentID = true
+                                } else {
+                                    binding.signupItsOkStudentID.visibility = View.GONE
+                                    binding.signupPlsChangeStudentID.visibility = View.VISIBLE
+                                    value_available_StudentID = false
+                                }
+                            }
+
+                            409 -> {
+                                binding.signupItsOkStudentID.visibility = View.GONE
+                                binding.signupPlsChangeStudentID.visibility = View.VISIBLE
+                                value_available_StudentID = false
+                            }
+
+                            else -> {
+                                Toast.makeText(requireContext(), "오류 발생: ${response.code}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            })
+    }
 }

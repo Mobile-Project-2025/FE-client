@@ -4,11 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentLoginBinding
@@ -17,8 +15,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
-import android.content.Context
 import android.util.Log
+import com.example.myapplication.ui.Log_in.HttpClientProvider
+import com.example.myapplication.ui.Log_in.TokenStore
 
 class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
@@ -32,17 +31,11 @@ class LoginFragment : Fragment() {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // 상단에 아이콘, 텍스트 2개
-        binding.loginIcon
-        binding.loginRePle1
-        binding.loginRePle2
-
         // 로그인 버튼
         binding.loginButton.setOnClickListener {
-            val value_login_ID = binding.loginID.text.toString()  // 아이디 입력칸
-            val value_login_PW = binding.loginPW.text.toString()  // 비밀번호 입력칸
+            val value_login_ID = binding.loginID.text.toString()
+            val value_login_PW = binding.loginPW.text.toString()
 
-            // 아이디, 입력칸을 비워놓지는 않았는가?
             while (true) {
                 if (value_login_ID.isBlank()) {
                     AlertDialog.Builder(requireContext()).run {
@@ -65,25 +58,19 @@ class LoginFragment : Fragment() {
                     break
                 }
 
-                // 로그인 성공 == (임시) 토스트로 로그 띄우고, 홈화면으로 이동
-                POST_login_request(value_login_ID, value_login_PW)  // 로그인 api 요청
+                POST_login_request(value_login_ID, value_login_PW)
                 Toast.makeText(
                     requireContext(),
                     "ID == $value_login_ID, PW == $value_login_PW",
                     Toast.LENGTH_SHORT
                 ).show()
-                // 아래 findNav 주석처리 하면, 로그인 실패해도 자동으로 안 넘어가고, 로그인 화면에 머무름
-                // findNavController().navigate(R.id.move_login_to_home)
                 break
             }
         }
 
-        // 버튼 == 화면 이동
-        // 회원가입 버튼 == 회원가입 페이지로 이동
         binding.loginMovetoSignup.setOnClickListener {
             findNavController().navigate(R.id.move_login_to_signup)
         }
-        // 관리자 화면 버튼 == 관리자 메인 페이지로 이동
         binding.loginMovetoTempAdmin.setOnClickListener {
             findNavController().navigate(R.id.move_login_to_admin_main)
         }
@@ -96,7 +83,6 @@ class LoginFragment : Fragment() {
         _binding = null
     }
 
-    // 로그인 요청 function 함수
     private fun POST_login_request(ID: String, Password: String) {
         val client = HttpClientProvider.get(requireContext())
 
@@ -127,8 +113,10 @@ class LoginFragment : Fragment() {
             override fun onResponse(call: Call, response: Response) {
                 val bodyStr = response.body?.string()
 
-                // return 코드 확인용 로그캣
-                Log.d("로그인 return 코드값", "로그인 return 코드값 = ${response.code}, body = $bodyStr")
+                Log.d(
+                    "로그인 return 코드값",
+                    "로그인 return 코드값 = ${response.code}, body = $bodyStr"
+                )
 
                 activity?.runOnUiThread {
                     if (response.isSuccessful && bodyStr != null) {
@@ -138,12 +126,10 @@ class LoginFragment : Fragment() {
                             val nickname = obj.optString("nickname")
                             val role = obj.optString("role")
 
-                            // 로그캣 확인용
                             Log.d("LOGIN_RESPONSE", "accessToken = $token")
                             Log.d("LOGIN_RESPONSE", "nickname = $nickname")
                             Log.d("LOGIN_RESPONSE", "role = $role")
 
-                            // 로그인 성공 (코드: 200) == return값 3개 저장
                             TokenStore.saveAll(requireContext(), token, nickname, role)
                             Toast.makeText(
                                 requireContext(),
@@ -151,13 +137,16 @@ class LoginFragment : Fragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                            // role 값에 따라 분기 (대소문자 상관없이 처리)
                             when (role.uppercase()) {
                                 "ADMIN" -> {
-                                    findNavController().navigate(R.id.move_login_to_admin_main)
+                                    findNavController().navigate(
+                                        R.id.move_login_to_admin_main
+                                    )
                                 }
                                 "STUDENT" -> {
-                                    findNavController().navigate(R.id.move_login_to_home)
+                                    findNavController().navigate(
+                                        R.id.move_login_to_home
+                                    )
                                 }
                                 else -> {
                                     Toast.makeText(
@@ -167,11 +156,10 @@ class LoginFragment : Fragment() {
                                     ).show()
                                 }
                             }
-
                         } catch (t: Throwable) {
                             AlertDialog.Builder(requireContext()).run {
                                 setTitle("응답 파싱 실패")
-                                setMessage("서버 응답 형식을 확인해주세요\n${bodyStr}")
+                                setMessage("서버 응답 형식을 확인해주세요\n$bodyStr")
                                 setPositiveButton("OK", null)
                                 show()
                             }
@@ -185,98 +173,7 @@ class LoginFragment : Fragment() {
                         }
                     }
                 }
-
             }
         })
-    }
-}
-
-object TokenStore {
-    private const val SP = "auth"
-    private const val KEY_TOKEN = "accessToken"
-    private const val KEY_NICKNAME = "nickname"
-    private const val KEY_ROLE = "role"
-
-    // 세 값 한 번에 저장
-    fun saveAll(context: Context, token: String?, nickname: String?, role: String?) {
-        if (token.isNullOrBlank()) return
-        val sp = context.getSharedPreferences(SP, Context.MODE_PRIVATE)
-        sp.edit()
-            .putString(KEY_TOKEN, token)
-            .putString(KEY_NICKNAME, nickname)
-            .putString(KEY_ROLE, role)
-            .apply()
-    }
-
-    // 기존 Interceptor에서 쓰는 토큰용
-    fun getToken(context: Context): String? =
-        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
-            .getString(KEY_TOKEN, null)
-
-    fun getNickname(context: Context): String? =
-        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
-            .getString(KEY_NICKNAME, null)
-
-    fun getRole(context: Context): String? =
-        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
-            .getString(KEY_ROLE, null)
-
-    fun clear(context: Context) {
-        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .apply()
-    }
-}
-
-class AuthInterceptor(private val context: Context) : Interceptor {
-    private val excludedPaths = listOf(
-        "/api/auth/login",
-        "/api/auth/signup"
-    )
-
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val original = chain.request()
-        val urlPath = original.url.encodedPath
-
-        val shouldAttach = excludedPaths.none { urlPath.endsWith(it) }
-
-        val reqBuilder = original.newBuilder()
-            .header("Accept", "application/json")
-
-        if (shouldAttach) {
-            val token = TokenStore.getToken(context)   // 👈 변경
-            if (!token.isNullOrBlank()) {
-                reqBuilder.header("Authorization", "Bearer $token")
-            }
-        }
-
-        val request = reqBuilder.build()
-        val response = chain.proceed(request)
-
-        // API return 코드 로그로
-        Log.d(
-            "HTTP",
-            "url=${response.request.url}, method=${response.request.method}, code=${response.code}"
-        )
-
-        if (response.code == 401) {
-            TokenStore.clear(context)
-        }
-        return response
-    }
-}
-
-object HttpClientProvider {
-    @Volatile
-    private var client: OkHttpClient? = null
-
-    fun get(context: Context): OkHttpClient {
-        return client ?: synchronized(this) {
-            client ?: OkHttpClient.Builder()
-                .addInterceptor(AuthInterceptor(context.applicationContext))
-                .build()
-                .also { client = it }
-        }
     }
 }

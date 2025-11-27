@@ -47,6 +47,12 @@
         <action
             android:id="@+id/move_home_to_camera"
             app:destination="@+id/navigation_mission_camera" />
+
+        <!-- 홈 화면 상단에 카드 클릭 시, gallery로 이동 -->
+        <action
+            android:id="@+id/move_home_to_gallery"
+            app:destination="@+id/navigation_gallery" />
+
     </fragment>
 
     <!-- 포인트 -->
@@ -117,5 +123,13 @@
         android:name="com.example.myapplication.ui.Admin_MissionList.AdminPendingMissionDetailFragment"
         android:label="승인 대기 미션 상세"
         tools:layout="@layout/fragment_admin_pending_mission_detail" />
+
+
+    <!-- NEW_갤러리 -->
+    <fragment
+        android:id="@+id/navigation_gallery"
+        android:name="com.example.myapplication.ui.Home.GalleryFragment_2"
+        android:label="GalleryFragment"
+        tools:layout="@layout/fragment_gallery" />
 
 </navigation>

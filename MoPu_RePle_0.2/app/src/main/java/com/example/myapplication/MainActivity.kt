@@ -28,13 +28,20 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
 
-                // 액션바, 네비바 둘 다 안 보이게 (로그인/회원가입/관리자 화면/갤러리)
+
                 R.id.navigation_login,
                 R.id.navigation_signup,
                 R.id.navigation_admin_main,
                 R.id.navigation_admin_mission_list,
                 R.id.navigation_admin_mission_create,
                 R.id.navigation_admin_pending_mission_detail,
+
+                // 액션바, 네비바 둘 다 안 보임 == login, signup, admin_main, admin_mission_list
+                R.id.navigation_login, R.id.navigation_signup, R.id.navigation_admin_main, R.id.navigation_admin_mission_list, R.id.navigation_gallery -> {
+                    supportActionBar?.hide()
+                    binding.navView.visibility = View.GONE
+                }
+
 
 
                 // 액션바만 숨기고 네비바는 보이게
