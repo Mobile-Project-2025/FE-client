@@ -19,6 +19,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import android.widget.Button
 
 class AdminPendingMissionDetailFragment : Fragment() {
 
@@ -275,17 +276,32 @@ class AdminPendingMissionDetailFragment : Fragment() {
 
     // 승인/반려 확인 모달
     private fun showConfirmDialog(participationId: Long) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("정말로 승인/반려하시겠습니까?")
-            .setMessage("확인 이후에는 승인/반려를 되돌릴 수 없습니다.\n선택한 참가작에 대해 진행할 작업을 골라주세요.")
-            .setNegativeButton("반려하기") { _, _ ->
-                requestApproveReject(participationId, approve = false)
-            }
-            .setPositiveButton("승인하기") { _, _ ->
-                requestApproveReject(participationId, approve = true)
-            }
-            .show()
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_admin_approve_reject, null)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        // 배경 모서리만 보이도록
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val btnReject = dialogView.findViewById<Button>(R.id.btnReject)
+        val btnApprove = dialogView.findViewById<Button>(R.id.btnApprove)
+
+        btnReject.setOnClickListener {
+            dialog.dismiss()
+            requestApproveReject(participationId, approve = false)
+        }
+
+        btnApprove.setOnClickListener {
+            dialog.dismiss()
+            requestApproveReject(participationId, approve = true)
+        }
+
+        dialog.show()
     }
+
 
     // PATCH /approve or /reject 호출
     private fun requestApproveReject(participationId: Long, approve: Boolean) {
