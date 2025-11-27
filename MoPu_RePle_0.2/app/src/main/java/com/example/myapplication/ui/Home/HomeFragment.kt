@@ -32,10 +32,10 @@ class HomeFragment : Fragment() {
     // 리사이클러뷰 어댑터
     private lateinit var missionAdapter: MissionAdapter
 
-    // [검색 핵심] API로 받아온 전체 데이터를 저장해둘 리스트
+    // 검색을 위해 전체 데이터를 저장해둘 리스트
     private var allLoadedMissions = listOf<Mission_Data>()
 
-    // [핵심 추가] 현재 어떤 미션을 보고 있는지 추적 (regular, event, pending)
+    // 현재 탭 상태 (regular, event, pending)
     private var currentType = "regular"
 
     override fun onCreateView(
@@ -46,173 +46,163 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // 1. 이미지 좌우 슬라이드 영역 설정
+        // 1. 이미지 슬라이더 설정
         val pager = binding.homeImgSlide1
         val sliderImages = listOf(
             R.drawable.horse_picture,
             R.drawable.main_banner1,
             R.drawable.main_banner2
         )
-        pager.adapter = ImagePagerAdapter(sliderImages)
-
-        binding.homeImgButtonSeeAll.setOnClickListener {
-            findNavController().navigate(R.id.navigation_gallery)
+        // 갤러리로 이동하는 클릭 이벤트 추가
+        pager.adapter = ImagePagerAdapter(sliderImages) {
+            findNavController().navigate(R.id.move_home_to_gallery)
         }
 
-        // 2. 리사이클러뷰(미션 목록) 설정
+        binding.homeImgButtonSeeAll.setOnClickListener {
+            findNavController().navigate(R.id.move_home_to_gallery) // 네비게이션 ID 확인 필요 (navigation_gallery 인지 move_home_to_gallery 인지)
+        }
+
+        // 2. 리사이클러뷰 설정 (핵심 로직)
         setupRecyclerView()
 
-
-        // 3. [검색 기능 구현] EditText 입력 감지
+        // 3. 검색 기능 연결
         binding.homeSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
             override fun afterTextChanged(s: Editable?) {
                 val searchText = s.toString().trim()
-                filterMissions(searchText) // 입력된 글자로 필터링 실행
+                filterMissions(searchText)
             }
         })
 
-
-        // 4. [수정됨] "승인 대기 미션" 버튼 클릭
+        // 4. 탭 버튼 클릭 리스너
+        // [승인 대기]
         binding.homeButtonTypeMission1.setOnClickListener {
             binding.homeTextMission.text = "승인 대기 미션 목록"
             loadMissions("pending")
         }
 
-
-        // 5. "상시 미션" 버튼 클릭 시
+        // [상시 미션]
         binding.homeButtonTypeMission2.setOnClickListener {
             binding.homeTextMission.text = "상시 미션 \n오늘도 환경을 잘 부탁해"
             loadMissions("regular")
         }
 
-
-        // 6. "돌발 미션" 버튼 클릭 시
+        // [돌발 미션]
         binding.homeButtonTypeMission3.setOnClickListener {
             binding.homeTextMission.text = "지금만 할 수 있는 \n돌발 미션!"
             loadMissions("event")
         }
 
-        // 초기 화면 로딩 (상시 미션)
+        // 초기 화면 로딩
         loadMissions("regular")
 
         return root
     }
 
-    // 리사이클러뷰 초기화 함수
+    // 리사이클러뷰 및 클릭 이벤트 설정
     private fun setupRecyclerView() {
         missionAdapter = MissionAdapter { mission ->
-            // [핵심 수정] 아이템 클릭 시 현재 탭 종류에 따라 이동 경로 분기 처리
-
             if (currentType == "pending") {
-                // 1. 승인 대기 미션 -> 상세 화면(Detail)으로 이동
-                // 승인 대기 미션은 participationId가 반드시 존재함
+                // 1. 승인 대기 목록인 경우 -> 내역 상세 화면으로 이동
                 val participationId = mission.participationId ?: 0L
-
-                // mobile_navigation.xml에 추가한 action ID를 사용하여 이동
                 val action = HomeFragmentDirections.actionHomeToHistoryDetail(participationId)
                 findNavController().navigate(action)
-
             } else {
-                // 2. 상시/돌발 미션 -> 카메라 인증 화면으로 이동 (기존 로직 유지)
-                val bundle = Bundle().apply {
-                    putInt("missionId", mission.missionId.toInt())
-                    putString("title", mission.title)
-                    putInt("missionPoint", mission.missionPoint)
-                    putString("createdAt", mission.createdAt)
-                    putString("iconImageUrl", mission.iconImageUrl)
-                }
-                findNavController().navigate(R.id.move_home_to_camera, bundle)
+                // 2. 상시/돌발 미션인 경우 -> [API 호출] 상세 정보 가져오기 -> 카메라 화면 이동
+                fetchMissionDetailAndNavigate(mission.missionId)
             }
         }
 
-        // XML에서 home_mission_list_container가 RecyclerView여야 함
         binding.homeMissionListContainer.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = missionAdapter
         }
     }
 
-    // API 통신 및 데이터 로드 함수 통합
-    private fun loadMissions(type: String) {
-        currentType = type // [중요] 현재 탭 상태 저장
-
+    // [로컬 파일에서 가져온 로직] 상세 정보 API 호출 후 이동
+    private fun fetchMissionDetailAndNavigate(missionId: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val api = ApiClient.getMissionsApi(requireContext())
-                val missions: List<Mission_Data>
+                // Int로 변환 (API 명세에 따라 다름, 보통 Long 권장이나 기존 코드 따름)
+                val detail = api.getMissionDetail(missionId.toInt())
+                Log.d("MissionAPI", "getMissionDetail 성공, missionId=${detail.missionId}")
 
-                // 타입에 따라 다른 API 함수 호출 및 데이터 처리
-                if (type == "pending") {
-                    // [승인 대기] API 호출
-                    val pendingList = api.getPendingMissions()
-
-                    // PendingMission 데이터를 Mission_Data 형태로 변환 (어댑터 재사용을 위해)
-                    missions = pendingList.map { pending ->
-                        Mission_Data(
-                            missionId = pending.missionId,
-                            title = pending.title,
-                            missionPoint = pending.missionPoint,
-                            category = pending.category,
-                            iconImageUrl = pending.iconImageUrl,
-                            bannerImageUrl = null, // 상세 화면에서 다시 로드하므로 null 처리
-                            participationCount = 0, // 대기 목록에서는 참가 인원 0 또는 숨김 처리
-                            createdAt = pending.submittedAt, // 제출일시를 생성일시 위치에 저장
-                            participationId = pending.participationId // [중요] 상세 이동을 위한 ID 저장
-                        )
-                    }
-                } else if (type == "regular") {
-                    // [상시] API 호출
-                    missions = api.getRegularMissions()
-                } else {
-                    // [돌발] API 호출
-                    missions = api.getEventMissions()
+                val bundle = Bundle().apply {
+                    putInt("missionId", detail.missionId) // detail 객체 필드명 확인 (Int/Long)
+                    putString("title", detail.title)
+                    putString("content", detail.content)
+                    putInt("missionPoint", detail.missionPoint)
+                    putString("iconImageUrl", detail.iconImageUrl)
+                    putString("startDate", detail.startDate)
+                    putString("deadLine", detail.deadLine)
+                    putInt("participationCount", detail.participationCount ?: 0)
+                    putBoolean("hasSubmitted", detail.hasSubmitted)
                 }
-
-                Log.d("MissionAPI", "get${type}Missions 성공, size = ${missions.size}")
-
-                // 로그 확인용
-                val gson = GsonBuilder().setPrettyPrinting().create()
-                Log.d("MissionAPI_Response", gson.toJson(missions))
-
-                // [중요] 1. 전체 데이터를 변수에 저장 (검색을 위해)
-                allLoadedMissions = missions
-
-                // [중요] 2. 화면에 뿌리기
-                missionAdapter.submitList(missions)
-
-                // 3. 검색창 초기화
-                binding.homeSearch.text.clear()
+                findNavController().navigate(R.id.move_home_to_camera, bundle)
 
             } catch (e: HttpException) {
-                Log.e("MissionAPI", "Load Fail: ${e.code()}", e)
-                Toast.makeText(requireContext(), "로딩 실패: ${e.code()}", Toast.LENGTH_SHORT).show()
+                Log.e("MissionAPI", "상세 조회 실패: ${e.code()}", e)
+                Toast.makeText(requireContext(), "상세 정보 로딩 실패", Toast.LENGTH_SHORT).show()
             } catch (e: Throwable) {
-                Log.e("MissionAPI", "Error: ${e.localizedMessage}", e)
-                Toast.makeText(requireContext(), "에러 발생", Toast.LENGTH_SHORT).show()
+                Log.e("MissionAPI", "에러: ${e.message}", e)
+                Toast.makeText(requireContext(), "네트워크 오류 발생", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    // [검색 로직] 저장된 allLoadedMissions에서 검색어가 포함된 것만 골라냄
-    private fun filterMissions(query: String) {
-        val filteredList = if (query.isEmpty()) {
-            allLoadedMissions // 검색어 없으면 전체 보여줌
-        } else {
-            allLoadedMissions.filter { mission ->
-                // 제목(title)에 검색어가 포함되어 있는지 확인 (대소문자 무시)
-                mission.title.contains(query, ignoreCase = true)
+    // 서버에서 미션 목록 가져오기
+    private fun loadMissions(type: String) {
+        currentType = type
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val api = ApiClient.getMissionsApi(requireContext())
+                val missions: List<Mission_Data> = when (type) {
+                    "pending" -> {
+                        // PendingMission -> Mission_Data 변환
+                        api.getPendingMissions().map { pending ->
+                            Mission_Data(
+                                missionId = pending.missionId,
+                                title = pending.title,
+                                missionPoint = pending.missionPoint,
+                                category = pending.category,
+                                iconImageUrl = pending.iconImageUrl,
+                                bannerImageUrl = null,
+                                participationCount = 0,
+                                createdAt = pending.submittedAt,
+                                participationId = pending.participationId
+                            )
+                        }
+                    }
+                    "regular" -> api.getRegularMissions()
+                    "event" -> api.getEventMissions()
+                    else -> emptyList()
+                }
+
+                Log.d("MissionAPI", "Load $type success, size=${missions.size}")
+
+                allLoadedMissions = missions
+                missionAdapter.submitList(missions)
+                binding.homeSearch.text.clear() // 탭 바꿀 때 검색 초기화
+
+            } catch (e: Exception) {
+                Log.e("MissionAPI", "Load Error", e)
+                Toast.makeText(requireContext(), "데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
-        // 걸러진 리스트를 어댑터에 전달 -> 화면 갱신
-        missionAdapter.submitList(filteredList)
+    }
+
+    // 검색 필터링
+    private fun filterMissions(query: String) {
+        val filtered = if (query.isBlank()) allLoadedMissions else {
+            allLoadedMissions.filter { it.title.contains(query, ignoreCase = true) }
+        }
+        missionAdapter.submitList(filtered)
     }
 
     override fun onResume() {
         super.onResume()
-        // 앱바(보라색 타이틀바)를 강제로 숨깁니다.
         (activity as? androidx.appcompat.app.AppCompatActivity)?.supportActionBar?.hide()
     }
 
@@ -221,11 +211,19 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    // =====================================================================
-    // 내부 클래스 1: 이미지 슬라이더 어댑터
-    private class ImagePagerAdapter(private val images: List<Int>) :
-        RecyclerView.Adapter<ImagePagerAdapter.VH>() {
-        inner class VH(val iv: ImageView) : RecyclerView.ViewHolder(iv)
+    // -------------------------------------------------------------
+    // 어댑터 클래스들
+    // -------------------------------------------------------------
+
+    private class ImagePagerAdapter(
+        private val images: List<Int>,
+        private val onImageClick: () -> Unit // 클릭 콜백 추가
+    ) : RecyclerView.Adapter<ImagePagerAdapter.VH>() {
+        inner class VH(val iv: ImageView) : RecyclerView.ViewHolder(iv) {
+            init {
+                iv.setOnClickListener { onImageClick() }
+            }
+        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val imageView = ImageView(parent.context).apply {
@@ -241,12 +239,9 @@ class HomeFragment : Fragment() {
         override fun onBindViewHolder(holder: VH, position: Int) {
             holder.iv.setImageResource(images[position])
         }
-
         override fun getItemCount(): Int = images.size
     }
 
-    // =====================================================================
-    // 내부 클래스 2: 미션 리스트 어댑터 (RecyclerView.Adapter)
     class MissionAdapter(val onClick: (Mission_Data) -> Unit) :
         RecyclerView.Adapter<MissionAdapter.MissionViewHolder>() {
 
@@ -259,7 +254,6 @@ class HomeFragment : Fragment() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MissionViewHolder {
-            // layout_mission_box_mode.xml을 바인딩으로 연결
             val binding = LayoutMissionBoxModeBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
             )
@@ -278,21 +272,16 @@ class HomeFragment : Fragment() {
             fun bind(item: Mission_Data) {
                 binding.homeMissionTextMode.text = item.title
                 binding.homeMissionTextPointMode.text = "${item.missionPoint}P"
-
                 val count = item.participationCount ?: 0
                 binding.homeMissionTextPeopleMode.text = "${count}명"
 
-                // Glide로 이미지 로드
                 Glide.with(itemView.context)
                     .load(item.iconImageUrl)
                     .placeholder(R.drawable.ic_mission)
                     .error(R.drawable.ic_mission)
                     .into(binding.homeMissionIconMode)
 
-                // 클릭 이벤트
-                itemView.setOnClickListener {
-                    onClick(item)
-                }
+                itemView.setOnClickListener { onClick(item) }
             }
         }
     }

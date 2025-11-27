@@ -1,0 +1,39 @@
+<resources>
+
+    <!-- 기존 CategoryButton 그대로 두기 -->
+    <style name="CategoryButton" parent="@android:style/Widget.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_weight">1</item>
+
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+
+        <item name="android:background">@drawable/category_button_selector</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@drawable/category_text_selector</item>
+    </style>
+
+
+    <!-- 새로 추가: 관리자 필터 버튼 -->
+    <style name="AdminFilterButton" parent="@android:style/Widget.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:layout_marginHorizontal">6dp</item>
+
+        <!-- 테마 기본 tint 제거(보라색 방지) -->
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+
+        <!-- 우리가 만든 selector -->
+        <item name="android:background">@drawable/admin_filter_button_selector</item>
+
+        <!-- 글자 색 selector -->
+        <item name="android:textColor">@drawable/admin_filter_text_selector</item>
+
+        <item name="android:textSize">14sp</item>
+    </style>
+
+</resources>
