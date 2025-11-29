@@ -95,7 +95,7 @@ class HomeFragment : Fragment() {
         }
 
         // 초기 화면 로딩
-        loadMissions("regular")
+        loadMissions("pending")
 
         return root
     }
@@ -183,6 +183,7 @@ class HomeFragment : Fragment() {
                 Log.d("MissionAPI", "Load $type success, size=${missions.size}")
 
                 allLoadedMissions = missions
+                missionAdapter.submitList(missions)
                 missionAdapter.submitList(missions)
                 binding.homeSearch.text.clear() // 탭 바꿀 때 검색 초기화
 
