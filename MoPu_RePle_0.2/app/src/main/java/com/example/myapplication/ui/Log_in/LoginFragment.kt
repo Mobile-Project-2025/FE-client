@@ -71,9 +71,6 @@ class LoginFragment : Fragment() {
         binding.loginMovetoSignup.setOnClickListener {
             findNavController().navigate(R.id.move_login_to_signup)
         }
-        binding.loginMovetoTempAdmin.setOnClickListener {
-            findNavController().navigate(R.id.move_login_to_admin_main)
-        }
 
         return root
     }
