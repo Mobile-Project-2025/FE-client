@@ -19,7 +19,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
-import android.widget.Button
 
 class AdminPendingMissionDetailFragment : Fragment() {
 
@@ -286,8 +285,9 @@ class AdminPendingMissionDetailFragment : Fragment() {
         // 배경 모서리만 보이도록
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        val btnReject = dialogView.findViewById<Button>(R.id.btnReject)
-        val btnApprove = dialogView.findViewById<Button>(R.id.btnApprove)
+        // 여기 Button → TextView 로 변경
+        val btnReject = dialogView.findViewById<TextView>(R.id.btnReject)
+        val btnApprove = dialogView.findViewById<TextView>(R.id.btnApprove)
 
         btnReject.setOnClickListener {
             dialog.dismiss()
@@ -301,7 +301,6 @@ class AdminPendingMissionDetailFragment : Fragment() {
 
         dialog.show()
     }
-
 
     // PATCH /approve or /reject 호출
     private fun requestApproveReject(participationId: Long, approve: Boolean) {
