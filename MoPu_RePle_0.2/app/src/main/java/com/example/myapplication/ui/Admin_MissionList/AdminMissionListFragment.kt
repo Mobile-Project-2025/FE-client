@@ -88,7 +88,7 @@ class AdminMissionListFragment : Fragment() {
                     MissionApiType.DEADLINE -> api.getDeadLineMissions()
                     MissionApiType.TERMINATION -> api.getTerminationMissions()
                     // 전체 목록용 API가 아직 없다면, 임시로 승인 대기와 동일하게 사용
-                    MissionApiType.ALL -> api.getPendingMissions_ADMIN()
+                    MissionApiType.ALL -> api.getAllMissions()
                 }
 
                 Log.d(

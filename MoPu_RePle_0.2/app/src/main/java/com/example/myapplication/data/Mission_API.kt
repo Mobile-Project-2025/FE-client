@@ -25,6 +25,8 @@ interface Mission_API {
     @GET("api/missions/event")
     suspend fun getEventMissions(): List<Mission_Data>
 
+    @GET("/api/admin/missions")
+    suspend fun getAllMissions(): List<Mission_Data>
     // 미션 업로드
     @Multipart
     @POST("api/missions/{missionId}/submit")
