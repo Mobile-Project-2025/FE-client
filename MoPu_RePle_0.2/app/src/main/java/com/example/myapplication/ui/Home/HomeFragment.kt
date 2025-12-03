@@ -49,7 +49,6 @@ class HomeFragment : Fragment() {
         // 1. 이미지 슬라이더 설정
         val pager = binding.homeImgSlide1
         val sliderImages = listOf(
-            R.drawable.horse_picture,
             R.drawable.main_banner1,
             R.drawable.main_banner2
         )
